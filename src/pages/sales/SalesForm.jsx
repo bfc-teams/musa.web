@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { InputGroup, SelectGroup } from '@/components/ui/FormElements';
+import { ServiceSelectionModal } from '@/components/ServiceSelectionModal';
 import api from '@/services/api';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Search } from 'lucide-react';
 
 export const SalesForm = () => {
   const navigate = useNavigate();
   const [warehouses, setWarehouses] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [services, setServices] = useState([]);
+  const [barcode, setBarcode] = useState('');
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [barcodeError, setBarcodeError] = useState('');
 
   const {
     register,
@@ -22,7 +24,7 @@ export const SalesForm = () => {
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
       payment_method: 'cash',
-      items: [{ item_type: 'product', id: '', quantity: 1, unit_price: 0, lot_number: '' }]
+      items: []
     }
   });
 
@@ -38,42 +40,77 @@ export const SalesForm = () => {
   }, 0);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchWarehouses = async () => {
       try {
-        const [warehousesRes, productsRes, servicesRes] = await Promise.all([
-          api.get('/warehouses?limit=100'),
-          api.get('/products?limit=100'),
-          api.get('/services?limit=100')
-        ]);
-
-        setWarehouses(warehousesRes.data.data || []);
-        setProducts(productsRes.data.data || []);
-        setServices(servicesRes.data.data || []);
+        const response = await api.get('/warehouses?limit=100');
+        setWarehouses(response.data.data || []);
       } catch (error) {
-        console.error('Error fetching dependencies:', error);
+        console.error('Error fetching warehouses:', error);
       }
     };
-    fetchData();
+    fetchWarehouses();
   }, []);
 
-  // Handle item selection change to auto-fill price
-  const handleItemChange = (index, type, id) => {
-    if (!id) return;
+  const handleBarcodeSubmit = async (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!barcode.trim()) return;
 
-    let price = 0;
-    if (type === 'product') {
-      const product = products.find(p => p.id === Number(id));
-      if (product) price = product.sale_price;
-    } else {
-      const service = services.find(s => s.id === Number(id));
-      if (service) price = service.base_price;
+      setBarcodeError('');
+      try {
+        // Try to find by barcode first, then SKU
+        let response = await api.get(`/products?barcode=${barcode}`);
+        let products = response.data.data || [];
+
+        if (products.length === 0) {
+          // Fallback to SKU if no barcode match
+          response = await api.get(`/products?sku=${barcode}`);
+          products = response.data.data || [];
+        }
+
+        if (products.length > 0) {
+          const product = products[0];
+          // Check if already exists to increment quantity? For now just append new line or user can adjust qty
+          append({
+            item_type: 'product',
+            id: product.id,
+            name: product.name,
+            sku: product.sku,
+            quantity: 1,
+            unit_price: Number(product.sale_price),
+            lot_number: ''
+          });
+          setBarcode('');
+        } else {
+          setBarcodeError('Product not found');
+        }
+      } catch (error) {
+        console.error('Error searching product:', error);
+        setBarcodeError('Error searching product');
+      }
     }
+  };
 
-    setValue(`items.${index}.unit_price`, price);
+  const handleAddServices = (selectedServices) => {
+    selectedServices.forEach(service => {
+      append({
+        item_type: 'service',
+        id: service.id,
+        name: service.name,
+        quantity: 1,
+        unit_price: Number(service.base_price),
+        lot_number: ''
+      });
+    });
   };
 
   const onSubmit = async (data) => {
     try {
+      if (data.items.length === 0) {
+        alert('Please add at least one item');
+        return;
+      }
+
       const payload = {
         ...data,
         items: data.items.map(item => ({
@@ -84,7 +121,7 @@ export const SalesForm = () => {
         }))
       };
 
-      await api.post('/sales', payload); // Assuming POST /sales maps to createSale in transactionController
+      await api.post('/sales', payload);
       navigate('/sales');
     } catch (error) {
       console.error('Error creating sale:', error);
@@ -182,113 +219,141 @@ export const SalesForm = () => {
 
         {/* Items List */}
         <div className="mt-9 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark flex justify-between items-center">
+          <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h3 className="font-medium text-black dark:text-white">
               Items
             </h3>
-            <button
-              type="button"
-              onClick={() => append({ item_type: 'product', id: '', quantity: 1, unit_price: 0, lot_number: '' })}
-              className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-4 text-center font-medium text-white hover:bg-opacity-90"
-            >
-              <Plus className="h-4 w-4" />
-              Add Item
-            </button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => setIsServiceModalOpen(true)}
+                className="inline-flex items-center justify-center gap-2.5 rounded-md border border-primary py-2 px-4 text-center font-medium text-primary hover:bg-primary hover:text-white transition"
+              >
+                <Plus className="h-4 w-4" />
+                Add Service
+              </button>
+            </div>
           </div>
+
           <div className="p-6.5">
+            {/* Barcode Input */}
+            <div className="mb-6">
+              <label className="mb-2.5 block text-black dark:text-white">
+                Scan Barcode / SKU (Press Enter)
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={barcode}
+                  onChange={(e) => setBarcode(e.target.value)}
+                  onKeyDown={handleBarcodeSubmit}
+                  placeholder="Scan or type barcode..."
+                  className={`w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${barcodeError ? 'border-danger focus:border-danger' : ''}`}
+                  autoFocus
+                />
+                <span className="absolute right-4 top-3">
+                  <Search className="h-6 w-6 text-gray-400" />
+                </span>
+              </div>
+              {barcodeError && <p className="mt-1 text-sm text-danger">{barcodeError}</p>}
+            </div>
+
+            {/* Items Table Header */}
+            {fields.length > 0 && (
+              <div className="hidden sm:flex border-b border-stroke dark:border-strokedark pb-2 mb-2 font-medium text-sm text-gray-500">
+                <div className="w-1/6">Type</div>
+                <div className="w-1/3">Item</div>
+                <div className="w-1/6">Qty</div>
+                <div className="w-1/6">Price</div>
+                <div className="w-1/6 text-right">Action</div>
+              </div>
+            )}
+
             {fields.map((item, index) => {
               const currentType = items[index]?.item_type || 'product';
               return (
                 <div key={item.id} className="mb-4 pb-4 border-b border-stroke dark:border-strokedark last:border-0 last:pb-0">
-                  <div className="flex flex-wrap gap-4 items-end">
+                  <div className="flex flex-wrap gap-4 items-center">
 
-                    <div className="w-full xl:w-1/6">
-                      <label className="mb-2.5 block text-black dark:text-white">Type</label>
-                      <select
-                        {...register(`items.${index}.item_type`)}
-                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                        onChange={(e) => {
-                          setValue(`items.${index}.item_type`, e.target.value);
-                          setValue(`items.${index}.id`, ''); // Reset selection
-                          setValue(`items.${index}.unit_price`, 0);
-                        }}
-                      >
-                        <option value="product">Product</option>
-                        <option value="service">Service</option>
-                      </select>
+                    <div className="w-full sm:w-1/6">
+                      <span className={`inline-block rounded px-2.5 py-0.5 text-sm font-medium ${currentType === 'product' ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'}`}>
+                        {currentType === 'product' ? 'Product' : 'Service'}
+                      </span>
                     </div>
 
-                    <div className="w-full xl:w-1/4">
-                      <label className="mb-2.5 block text-black dark:text-white">Item</label>
-                      <select
-                        {...register(`items.${index}.id`, { required: true })}
-                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                        onChange={(e) => {
-                          setValue(`items.${index}.id`, e.target.value);
-                          handleItemChange(index, currentType, e.target.value);
-                        }}
-                      >
-                        <option value="">Select...</option>
-                        {currentType === 'product' ? (
-                          products.map(p => (
-                            <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>
-                          ))
-                        ) : (
-                          services.map(s => (
-                            <option key={s.id} value={s.id}>{s.name}</option>
-                          ))
-                        )}
-                      </select>
+                    <div className="w-full sm:w-1/3">
+                      <p className="text-black dark:text-white font-medium">
+                        {items[index]?.name || 'Unknown Item'}
+                      </p>
+                      {currentType === 'product' && items[index]?.sku && (
+                        <span className="text-xs text-gray-500">SKU: {items[index].sku}</span>
+                      )}
+                      {/* Hidden inputs to maintain form state */}
+                      <input type="hidden" {...register(`items.${index}.item_type`)} />
+                      <input type="hidden" {...register(`items.${index}.id`)} />
                     </div>
 
-                    <div className="w-full xl:w-1/6">
+                    <div className="w-full sm:w-1/6">
                       <InputGroup
-                        label="Quantity"
                         name={`items.${index}.quantity`}
                         type="number"
                         register={register}
                         required
                         placeholder="1"
+                        customClasses="mb-0"
                       />
                     </div>
 
-                    <div className="w-full xl:w-1/6">
+                    <div className="w-full sm:w-1/6">
                       <InputGroup
-                        label="Unit Price"
                         name={`items.${index}.unit_price`}
                         type="number"
                         register={register}
                         required
                         placeholder="0.00"
+                        customClasses="mb-0"
                       />
                     </div>
 
-                    {currentType === 'product' && (
-                      <div className="w-full xl:w-1/6">
-                        <InputGroup
-                          label="Lot Number"
-                          name={`items.${index}.lot_number`}
-                          register={register}
-                          placeholder="Optional"
-                        />
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => remove(index)}
-                      className="mb-3 p-2 text-danger hover:bg-danger hover:bg-opacity-10 rounded"
-                      title="Remove Item"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
+                    <div className="w-full sm:w-1/6 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="p-2 text-danger hover:bg-danger hover:bg-opacity-10 rounded"
+                        title="Remove Item"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
+                  {/* Optional Lot Number for Products */}
+                  {currentType === 'product' && (
+                    <div className="mt-2 w-full sm:w-1/3 sm:ml-[16.66%]">
+                      <input
+                        {...register(`items.${index}.lot_number`)}
+                        placeholder="Lot Number (Optional)"
+                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-1 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                      />
+                    </div>
+                  )}
                 </div>
               )
             })}
+
+            {fields.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No items added. Scan a barcode or add a service.
+              </div>
+            )}
           </div>
         </div>
       </form>
+
+      <ServiceSelectionModal
+        isOpen={isServiceModalOpen}
+        onClose={() => setIsServiceModalOpen(false)}
+        onAddServices={handleAddServices}
+      />
     </>
   );
 };

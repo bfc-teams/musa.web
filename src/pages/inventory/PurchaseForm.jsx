@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { InputGroup, SelectGroup } from '@/components/ui/FormElements';
+import { ProductSelectionModal } from '@/components/ProductSelectionModal';
 import api from '@/services/api';
 import { Plus, Trash2 } from 'lucide-react';
 
@@ -9,7 +10,7 @@ export const PurchaseForm = () => {
   const navigate = useNavigate();
   const [suppliers, setSuppliers] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
   const {
     register,
@@ -21,7 +22,7 @@ export const PurchaseForm = () => {
   } = useForm({
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
-      items: [{ product_id: '', quantity: 1, unit_cost: 0, lot_number: '', expiration_date: '' }]
+      items: []
     }
   });
 
@@ -39,15 +40,13 @@ export const PurchaseForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [suppliersRes, warehousesRes, productsRes] = await Promise.all([
+        const [suppliersRes, warehousesRes] = await Promise.all([
           api.get('/suppliers?limit=100'),
-          api.get('/warehouses?limit=100'),
-          api.get('/products?limit=100')
+          api.get('/warehouses?limit=100')
         ]);
 
         setSuppliers(suppliersRes.data.data || []);
         setWarehouses(warehousesRes.data.data || []);
-        setProducts(productsRes.data.data || []);
       } catch (error) {
         console.error('Error fetching dependencies:', error);
       }
@@ -55,8 +54,27 @@ export const PurchaseForm = () => {
     fetchData();
   }, []);
 
+  const handleAddProducts = (selectedProducts) => {
+    selectedProducts.forEach(product => {
+      append({
+        product_id: product.id,
+        name: product.name,
+        sku: product.sku,
+        quantity: 1,
+        unit_cost: Number(product.cost_price),
+        lot_number: '',
+        expiration_date: ''
+      });
+    });
+  };
+
   const onSubmit = async (data) => {
     try {
+      if (data.items.length === 0) {
+        alert('Por favor agregue al menos un producto');
+        return;
+      }
+
       // Transform data if necessary
       const payload = {
         ...data,
@@ -68,11 +86,11 @@ export const PurchaseForm = () => {
         }))
       };
 
-      await api.post('/purchases', payload); // Assuming POST /purchases maps to createPurchase
+      await api.post('/purchases', payload);
       navigate('/inventory/purchases');
     } catch (error) {
       console.error('Error creating purchase:', error);
-      alert('Error creating purchase');
+      alert('Error al registrar la compra');
     }
   };
 
@@ -80,7 +98,7 @@ export const PurchaseForm = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          New Purchase
+          Nueva Compra
         </h2>
       </div>
 
@@ -91,12 +109,12 @@ export const PurchaseForm = () => {
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">
-                  General Information
+                  Información General
                 </h3>
               </div>
               <div className="p-6.5">
                 <SelectGroup
-                  label="Supplier"
+                  label="Proveedor"
                   name="supplier_id"
                   register={register}
                   error={errors.supplier_id}
@@ -104,7 +122,7 @@ export const PurchaseForm = () => {
                   options={suppliers.map(s => ({ value: s.id, label: s.name }))}
                 />
                 <SelectGroup
-                  label="Warehouse"
+                  label="Almacén"
                   name="warehouse_id"
                   register={register}
                   error={errors.warehouse_id}
@@ -112,7 +130,7 @@ export const PurchaseForm = () => {
                   options={warehouses.map(w => ({ value: w.id, label: w.name }))}
                 />
                 <InputGroup
-                  label="Date"
+                  label="Fecha"
                   name="date"
                   type="date"
                   register={register}
@@ -120,7 +138,7 @@ export const PurchaseForm = () => {
                   required
                 />
                 <InputGroup
-                  label="Invoice Number"
+                  label="Número de Factura"
                   name="invoice_number"
                   register={register}
                   error={errors.invoice_number}
@@ -135,16 +153,16 @@ export const PurchaseForm = () => {
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">
-                  Summary
+                  Resumen
                 </h3>
               </div>
               <div className="p-6.5">
                 <div className="mb-4 flex justify-between">
-                  <span className="font-medium">Total Items:</span>
+                  <span className="font-medium">Total Ítems:</span>
                   <span>{items.length}</span>
                 </div>
                 <div className="mb-4 flex justify-between text-xl font-bold text-primary">
-                  <span>Total Cost:</span>
+                  <span>Costo Total:</span>
                   <span>${totalCost.toFixed(2)}</span>
                 </div>
                 <button
@@ -152,7 +170,7 @@ export const PurchaseForm = () => {
                   disabled={isSubmitting}
                   className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
                 >
-                  {isSubmitting ? 'Processing...' : 'Create Purchase'}
+                  {isSubmitting ? 'Procesando...' : 'Registrar Compra'}
                 </button>
               </div>
             </div>
@@ -163,88 +181,110 @@ export const PurchaseForm = () => {
         <div className="mt-9 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark flex justify-between items-center">
             <h3 className="font-medium text-black dark:text-white">
-              Items
+              Ítems
             </h3>
             <button
               type="button"
-              onClick={() => append({ product_id: '', quantity: 1, unit_cost: 0, lot_number: '', expiration_date: '' })}
+              onClick={() => setIsProductModalOpen(true)}
               className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-4 text-center font-medium text-white hover:bg-opacity-90"
             >
               <Plus className="h-4 w-4" />
-              Add Item
+              Agregar Productos
             </button>
           </div>
           <div className="p-6.5">
+            {fields.length > 0 && (
+              <div className="hidden sm:flex border-b border-stroke dark:border-strokedark pb-2 mb-2 font-medium text-sm text-gray-500">
+                <div className="w-1/4">Producto</div>
+                <div className="w-1/6">Cantidad</div>
+                <div className="w-1/6">Costo Unit.</div>
+                <div className="w-1/6">Lote</div>
+                <div className="w-1/6">Vencimiento</div>
+                <div className="w-1/12 text-right">Acción</div>
+              </div>
+            )}
+
             {fields.map((item, index) => (
               <div key={item.id} className="mb-4 pb-4 border-b border-stroke dark:border-strokedark last:border-0 last:pb-0">
-                <div className="flex flex-wrap gap-4 items-end">
-                  <div className="w-full xl:w-1/4">
-                    <label className="mb-2.5 block text-black dark:text-white">Product</label>
-                    <select
-                      {...register(`items.${index}.product_id`, { required: true })}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    >
-                      <option value="">Select Product</option>
-                      {products.map(p => (
-                        <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>
-                      ))}
-                    </select>
+                <div className="flex flex-wrap gap-4 items-center">
+                  <div className="w-full sm:w-1/4">
+                    <p className="text-black dark:text-white font-medium">
+                      {items[index]?.name || 'Producto Desconocido'}
+                    </p>
+                    {items[index]?.sku && (
+                      <span className="text-xs text-gray-500">SKU: {items[index].sku}</span>
+                    )}
+                    <input type="hidden" {...register(`items.${index}.product_id`)} />
                   </div>
 
-                  <div className="w-full xl:w-1/6">
+                  <div className="w-full sm:w-1/6">
                     <InputGroup
-                      label="Quantity"
                       name={`items.${index}.quantity`}
                       type="number"
                       register={register}
                       required
                       placeholder="1"
+                      customClasses="mb-0"
                     />
                   </div>
 
-                  <div className="w-full xl:w-1/6">
+                  <div className="w-full sm:w-1/6">
                     <InputGroup
-                      label="Unit Cost"
                       name={`items.${index}.unit_cost`}
                       type="number"
                       register={register}
                       required
                       placeholder="0.00"
+                      customClasses="mb-0"
                     />
                   </div>
 
-                  <div className="w-full xl:w-1/6">
+                  <div className="w-full sm:w-1/6">
                     <InputGroup
-                      label="Lot Number"
                       name={`items.${index}.lot_number`}
                       register={register}
-                      placeholder="Lot"
+                      placeholder="Lote"
+                      customClasses="mb-0"
                     />
                   </div>
 
-                  <div className="w-full xl:w-1/6">
+                  <div className="w-full sm:w-1/6">
                     <InputGroup
-                      label="Expires"
                       name={`items.${index}.expiration_date`}
                       type="date"
                       register={register}
+                      customClasses="mb-0"
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => remove(index)}
-                    className="mb-3 p-2 text-danger hover:bg-danger hover:bg-opacity-10 rounded"
-                    title="Remove Item"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
+                  <div className="w-full sm:w-1/12 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="p-2 text-danger hover:bg-danger hover:bg-opacity-10 rounded"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
+
+            {fields.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No hay productos agregados. Haga clic en "Agregar Productos" para comenzar.
+              </div>
+            )}
           </div>
         </div>
       </form>
+
+      <ProductSelectionModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        onAddProducts={handleAddProducts}
+      />
     </>
   );
 };

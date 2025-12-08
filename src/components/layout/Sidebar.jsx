@@ -19,6 +19,8 @@ const sidebarItems = [
       { label: 'Almacenes', route: '/inventory/warehouses' },
       { label: 'Proveedores', route: '/inventory/suppliers' },
       { label: 'Productos', route: '/products' },
+      { label: 'Stock Global', route: '/inventory/stock' },
+      { label: 'Transferir Stock', route: '/inventory/transfers/new' },
     ],
   },
   { icon: ShoppingBag, label: 'Compras', route: '/inventory/purchases' },

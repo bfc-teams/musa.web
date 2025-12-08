@@ -18,6 +18,8 @@ import { PurchasesList } from '@/pages/inventory/PurchasesList'
 import { PurchaseForm } from '@/pages/inventory/PurchaseForm'
 import { SalesList } from '@/pages/sales/SalesList'
 import { SalesForm } from '@/pages/sales/SalesForm'
+import { StockTransferForm } from '@/pages/inventory/StockTransferForm'
+import { StockList } from '@/pages/inventory/StockList'
 
 function App() {
   return (
@@ -44,6 +46,8 @@ function App() {
             <Route path="inventory/suppliers/:id/edit" element={<SupplierForm />} />
             <Route path="inventory/purchases" element={<PurchasesList />} />
             <Route path="inventory/purchases/new" element={<PurchaseForm />} />
+            <Route path="inventory/transfers/new" element={<StockTransferForm />} />
+            <Route path="inventory/stock" element={<StockList />} />
             <Route path="sales" element={<SalesList />} />
             <Route path="sales/new" element={<SalesForm />} />
           </Route>

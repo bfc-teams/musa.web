@@ -10,16 +10,22 @@ export const WarehousesList = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [filters, setFilters] = useState({ name: '', location: '' });
   const limit = 10;
 
   useEffect(() => {
     fetchWarehouses(currentPage);
-  }, [currentPage]);
+  }, [currentPage, filters]);
 
   const fetchWarehouses = async (page) => {
     setLoading(true);
     try {
-      const response = await api.get(`/warehouses?page=${page}&limit=${limit}`);
+      const queryParams = new URLSearchParams({
+        page,
+        limit,
+        ...filters,
+      }).toString();
+      const response = await api.get(`/warehouses?${queryParams}`);
       console.log('Warehouses API Response:', response.data);
       setWarehouses(response.data.data || []);
       setTotalPages(response.data.pagination?.totalPages || 1);
@@ -28,6 +34,12 @@ export const WarehousesList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+    setCurrentPage(1); // Reset to first page on filter change
   };
 
   const handleDelete = async (id) => {
@@ -80,6 +92,32 @@ export const WarehousesList = () => {
           <Plus className="h-5 w-5" />
           Add Warehouse
         </Link>
+      </div>
+
+      {/* Filters */}
+      <div className="mb-6 rounded-sm border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="w-full sm:w-1/2">
+            <input
+              type="text"
+              name="name"
+              placeholder="Filter by Name"
+              value={filters.name}
+              onChange={handleFilterChange}
+              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
+          </div>
+          <div className="w-full sm:w-1/2">
+            <input
+              type="text"
+              name="location"
+              placeholder="Filter by Location"
+              value={filters.location}
+              onChange={handleFilterChange}
+              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
+          </div>
+        </div>
       </div>
 
       {loading ? (

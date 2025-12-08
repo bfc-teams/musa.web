@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { InputGroup } from '@/components/ui/FormElements';
+import { InputGroup, SelectGroup } from '@/components/ui/FormElements';
 import api from '@/services/api';
 
 export const ServiceForm = () => {
