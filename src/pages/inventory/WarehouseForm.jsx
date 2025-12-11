@@ -56,7 +56,7 @@ export const WarehouseForm = () => {
       navigate('/inventory/warehouses');
     } catch (error) {
       console.error('Error saving warehouse:', error);
-      alert('Error saving warehouse');
+      alert('Error al guardar el almacén');
     }
   };
 
@@ -64,54 +64,54 @@ export const WarehouseForm = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          {isEditMode ? 'Edit Warehouse' : 'Add Warehouse'}
+          {isEditMode ? 'Editar Almacén' : 'Agregar Almacén'}
         </h2>
       </div>
 
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
           <h3 className="font-medium text-black dark:text-white">
-            Warehouse Details
+            Detalles del Almacén
           </h3>
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="p-6.5">
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
               <InputGroup
-                label="Warehouse Name"
+                label="Nombre del Almacén"
                 name="name"
                 register={register}
                 error={errors.name}
                 required
-                placeholder="Enter warehouse name"
+                placeholder="Ingrese nombre del almacén"
                 customClasses="w-full xl:w-1/2"
               />
               <InputGroup
-                label="Location"
+                label="Ubicación"
                 name="location"
                 register={register}
                 error={errors.location}
                 required
-                placeholder="Enter location"
+                placeholder="Ingrese ubicación"
                 customClasses="w-full xl:w-1/2"
               />
             </div>
 
             <InputGroup
-              label="Phone"
+              label="Teléfono"
               name="phone"
               register={register}
               error={errors.phone}
-              placeholder="Enter phone number"
+              placeholder="Ingrese teléfono"
             />
 
             <div className="mb-4.5">
               <label className="mb-2.5 block text-black dark:text-white">
-                Description
+                Descripción
               </label>
               <textarea
                 rows={4}
-                placeholder="Enter warehouse description"
+                placeholder="Ingrese descripción del almacén"
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                 {...register('description')}
               ></textarea>
@@ -122,7 +122,7 @@ export const WarehouseForm = () => {
               disabled={isSubmitting}
               className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              {isSubmitting ? 'Saving...' : 'Save Warehouse'}
+              {isSubmitting ? 'Guardando...' : 'Guardar Almacén'}
             </button>
           </div>
         </form>

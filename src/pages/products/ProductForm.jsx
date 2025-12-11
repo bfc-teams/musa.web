@@ -44,7 +44,7 @@ export const ProductForm = () => {
       navigate('/products');
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Error saving product');
+      alert('Error al guardar el producto');
     }
   };
 
@@ -52,26 +52,26 @@ export const ProductForm = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          {isEditMode ? 'Edit Product' : 'Add Product'}
+          {isEditMode ? 'Editar Producto' : 'Agregar Producto'}
         </h2>
       </div>
 
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
           <h3 className="font-medium text-black dark:text-white">
-            Product Details
+            Detalles del Producto
           </h3>
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="p-6.5">
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
               <InputGroup
-                label="Product Name"
+                label="Nombre del Producto"
                 name="name"
                 register={register}
                 error={errors.name}
                 required
-                placeholder="Enter product name"
+                placeholder="Ingrese nombre del producto"
                 customClasses="w-full xl:w-1/2"
               />
               <InputGroup
@@ -80,18 +80,18 @@ export const ProductForm = () => {
                 register={register}
                 error={errors.sku}
                 required
-                placeholder="Enter SKU"
+                placeholder="Ingrese SKU"
                 customClasses="w-full xl:w-1/2"
               />
             </div>
 
             <div className="mb-4.5">
               <label className="mb-2.5 block text-black dark:text-white">
-                Description
+                Descripción
               </label>
               <textarea
                 rows={4}
-                placeholder="Enter product description"
+                placeholder="Ingrese descripción del producto"
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                 {...register('description')}
               ></textarea>
@@ -99,26 +99,26 @@ export const ProductForm = () => {
 
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
               <InputGroup
-                label="Brand"
+                label="Marca"
                 name="brand"
                 register={register}
                 error={errors.brand}
-                placeholder="Enter brand"
+                placeholder="Ingrese marca"
                 customClasses="w-full xl:w-1/2"
               />
               <InputGroup
-                label="Barcode"
+                label="Código de Barras"
                 name="barcode"
                 register={register}
                 error={errors.barcode}
-                placeholder="Enter barcode"
+                placeholder="Ingrese código de barras"
                 customClasses="w-full xl:w-1/2"
               />
             </div>
 
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
               <InputGroup
-                label="Sale Price"
+                label="Precio de Venta"
                 name="sale_price"
                 type="number"
                 register={register}
@@ -128,7 +128,7 @@ export const ProductForm = () => {
                 customClasses="w-full xl:w-1/3"
               />
               <InputGroup
-                label="Cost Price"
+                label="Costo"
                 name="cost_price"
                 type="number"
                 register={register}
@@ -137,7 +137,7 @@ export const ProductForm = () => {
                 customClasses="w-full xl:w-1/3"
               />
               <InputGroup
-                label="Min Stock Level"
+                label="Stock Mínimo"
                 name="min_stock_level"
                 type="number"
                 register={register}
@@ -148,16 +148,16 @@ export const ProductForm = () => {
             </div>
 
             <SelectGroup
-              label="Category"
+              label="Categoría"
               name="category"
               register={register}
               error={errors.category}
               required
               options={[
-                { value: 'Hair Care', label: 'Hair Care' },
-                { value: 'Skin Care', label: 'Skin Care' },
+                { value: 'Hair Care', label: 'Cuidado del Cabello' },
+                { value: 'Skin Care', label: 'Cuidado de la Piel' },
                 { value: 'Color', label: 'Color' },
-                { value: 'Tools', label: 'Tools' },
+                { value: 'Tools', label: 'Herramientas' },
               ]}
             />
 
@@ -166,7 +166,7 @@ export const ProductForm = () => {
               disabled={isSubmitting}
               className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              {isSubmitting ? 'Saving...' : 'Save Product'}
+              {isSubmitting ? 'Guardando...' : 'Guardar Producto'}
             </button>
           </div>
         </form>

@@ -4,6 +4,7 @@ import { Table } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
 import { Edit, Trash2, Plus } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export const EmployeesList = () => {
   const [employees, setEmployees] = useState([]);
@@ -13,9 +14,11 @@ export const EmployeesList = () => {
   const [filters, setFilters] = useState({ name: '', role: '', email: '' });
   const limit = 10;
 
+  const debouncedFilters = useDebounce(filters, 1000);
+
   useEffect(() => {
     fetchEmployees(currentPage);
-  }, [currentPage, filters]);
+  }, [currentPage, debouncedFilters]);
 
   const fetchEmployees = async (page) => {
     setLoading(true);
@@ -23,7 +26,7 @@ export const EmployeesList = () => {
       const queryParams = new URLSearchParams({
         page,
         limit,
-        ...filters,
+        ...debouncedFilters,
       }).toString();
       const response = await api.get(`/employees?${queryParams}`);
       console.log('Employees API Response:', response.data); // Debugging
@@ -43,7 +46,7 @@ export const EmployeesList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this employee?')) {
+    if (window.confirm('¿Está seguro de que desea eliminar este empleado?')) {
       try {
         await api.delete(`/employees/${id}`);
         fetchEmployees(currentPage);
@@ -54,10 +57,10 @@ export const EmployeesList = () => {
   };
 
   const columns = [
-    { header: 'Name', accessor: 'name' },
+    { header: 'Nombre', accessor: 'name' },
     { header: 'Email', accessor: 'email' },
-    { header: 'Role', accessor: 'role' },
-    { header: 'Phone', accessor: 'phone' },
+    { header: 'Rol', accessor: 'role' },
+    { header: 'Teléfono', accessor: 'phone' },
   ];
 
   const actions = (row) => (
@@ -83,14 +86,14 @@ export const EmployeesList = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          Employees
+          Empleados
         </h2>
         <Link
           to="/employees/new"
-          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-6 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
         >
           <Plus className="h-5 w-5" />
-          Add Employee
+          Agregar Empleado
         </Link>
       </div>
 
@@ -101,7 +104,7 @@ export const EmployeesList = () => {
             <input
               type="text"
               name="name"
-              placeholder="Filter by Name"
+              placeholder="Filtrar por Nombre"
               value={filters.name}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -111,7 +114,7 @@ export const EmployeesList = () => {
             <input
               type="text"
               name="email"
-              placeholder="Filter by Email"
+              placeholder="Filtrar por Email"
               value={filters.email}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -124,17 +127,17 @@ export const EmployeesList = () => {
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             >
-              <option value="">All Roles</option>
+              <option value="">Todos los Roles</option>
               <option value="ADMIN">Admin</option>
-              <option value="STYLIST">Stylist</option>
-              <option value="RECEPTIONIST">Receptionist</option>
+              <option value="STYLIST">Estilista</option>
+              <option value="RECEPTIONIST">Recepcionista</option>
             </select>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <p>Cargando...</p>
       ) : (
         <>
           <Table columns={columns} data={employees} actions={actions} />

@@ -4,6 +4,7 @@ import { Table } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
 import { Edit, Trash2, Plus } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export const ProductsList = () => {
   const [products, setProducts] = useState([]);
@@ -14,9 +15,11 @@ export const ProductsList = () => {
   const [showStock, setShowStock] = useState(false);
   const limit = 10;
 
+  const debouncedFilters = useDebounce(filters, 1000);
+
   useEffect(() => {
     fetchProducts(currentPage);
-  }, [currentPage, filters, showStock]);
+  }, [currentPage, debouncedFilters, showStock]);
 
   const fetchProducts = async (page) => {
     setLoading(true);
@@ -24,7 +27,7 @@ export const ProductsList = () => {
       const queryParams = new URLSearchParams({
         page,
         limit,
-        ...filters,
+        ...debouncedFilters,
         stock: showStock ? '1' : '0',
       }).toString();
       const response = await api.get(`/products?${queryParams}`);
@@ -45,7 +48,7 @@ export const ProductsList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm('¿Está seguro de que desea eliminar este producto?')) {
       try {
         await api.delete(`/products/${id}`);
         fetchProducts(currentPage);
@@ -56,10 +59,10 @@ export const ProductsList = () => {
   };
 
   const columns = [
-    { header: 'Name', accessor: 'name' },
+    { header: 'Nombre', accessor: 'name' },
     { header: 'SKU', accessor: 'sku' },
-    { header: 'Category', accessor: 'category' },
-    { header: 'Price', accessor: 'sale_price', render: (row) => `$${Number(row.sale_price || 0).toFixed(2)}` },
+    { header: 'Categoría', accessor: 'category' },
+    { header: 'Precio', accessor: 'sale_price', render: (row) => `$${Number(row.sale_price || 0).toFixed(2)}` },
     {
       header: 'Stock',
       accessor: 'stock',
@@ -69,7 +72,7 @@ export const ProductsList = () => {
             <div className="flex flex-col gap-1">
               {row.ProductStocks.map((stock) => (
                 <div key={stock.id} className="text-sm">
-                  <span className="font-semibold">{stock.Warehouse?.name || 'Unknown'}:</span> {stock.quantity}
+                  <span className="font-semibold">{stock.Warehouse?.name || 'Desconocido'}:</span> {stock.quantity}
                 </div>
               ))}
               <div className="border-t border-gray-200 pt-1 mt-1 font-bold">
@@ -88,14 +91,14 @@ export const ProductsList = () => {
       <Link
         to={`/products/${row.id}/edit`}
         className="hover:text-primary"
-        title="Edit"
+        title="Editar"
       >
         <Edit className="h-5 w-5" />
       </Link>
       <button
         onClick={() => handleDelete(row.id)}
         className="hover:text-meta-1"
-        title="Delete"
+        title="Eliminar"
       >
         <Trash2 className="h-5 w-5" />
       </button>
@@ -106,14 +109,14 @@ export const ProductsList = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          Products
+          Productos
         </h2>
         <Link
           to="/products/new"
-          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-6 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
         >
           <Plus className="h-5 w-5" />
-          Add Product
+          Agregar Producto
         </Link>
       </div>
 
@@ -124,7 +127,7 @@ export const ProductsList = () => {
             <input
               type="text"
               name="name"
-              placeholder="Filter by Name"
+              placeholder="Filtrar por Nombre"
               value={filters.name}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -134,7 +137,7 @@ export const ProductsList = () => {
             <input
               type="text"
               name="sku"
-              placeholder="Filter by SKU"
+              placeholder="Filtrar por SKU"
               value={filters.sku}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -147,11 +150,11 @@ export const ProductsList = () => {
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             >
-              <option value="">All Categories</option>
-              <option value="Hair Care">Hair Care</option>
-              <option value="Skin Care">Skin Care</option>
+              <option value="">Todas las Categorías</option>
+              <option value="Hair Care">Cuidado del Cabello</option>
+              <option value="Skin Care">Cuidado de la Piel</option>
               <option value="Color">Color</option>
-              <option value="Tools">Tools</option>
+              <option value="Tools">Herramientas</option>
             </select>
           </div>
           <div className="flex w-full items-center sm:w-1/4">
@@ -167,7 +170,7 @@ export const ProductsList = () => {
                 <div className={`dot absolute left-1 top-1 h-6 w-6 rounded-full bg-white transition ${showStock ? 'translate-x-6' : ''}`}></div>
               </div>
               <div className="ml-3 text-black dark:text-white">
-                Show Stock
+                Mostrar Stock
               </div>
             </label>
           </div>
@@ -175,7 +178,7 @@ export const ProductsList = () => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <p>Cargando...</p>
       ) : (
         <>
           <Table columns={columns} data={products} actions={actions} />

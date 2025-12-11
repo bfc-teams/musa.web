@@ -12,8 +12,11 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
+    "@htmldocs/react": "^0.2.30",
     "axios": "^1.13.2",
+    "date-fns": "^3.6.0",
     "flatpickr": "^4.6.13",
+    "htmldocs": "latest",
     "jsvectormap": "^1.6.0",
     "lucide-react": "^0.363.0",
     "react": "^18.2.0",

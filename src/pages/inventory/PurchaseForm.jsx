@@ -194,70 +194,66 @@ export const PurchaseForm = () => {
           </div>
           <div className="p-6.5">
             {fields.length > 0 && (
-              <div className="hidden sm:flex border-b border-stroke dark:border-strokedark pb-2 mb-2 font-medium text-sm text-gray-500">
-                <div className="w-1/4">Producto</div>
-                <div className="w-1/6">Cantidad</div>
-                <div className="w-1/6">Costo Unit.</div>
-                <div className="w-1/6">Lote</div>
-                <div className="w-1/6">Vencimiento</div>
-                <div className="w-1/12 text-right">Acción</div>
+              <div className="hidden sm:grid grid-cols-12 gap-4 border-b border-stroke dark:border-strokedark pb-2 mb-2 font-medium text-sm text-gray-500">
+                <div className="col-span-12 sm:col-span-3">Producto</div>
+                <div className="col-span-6 sm:col-span-2">Cantidad</div>
+                <div className="col-span-6 sm:col-span-2">Costo Unit.</div>
+                <div className="col-span-6 sm:col-span-2">Lote</div>
+                <div className="col-span-6 sm:col-span-2">Vencimiento</div>
+                <div className="col-span-12 sm:col-span-1 text-right">Acción</div>
               </div>
             )}
 
             {fields.map((item, index) => (
               <div key={item.id} className="mb-4 pb-4 border-b border-stroke dark:border-strokedark last:border-0 last:pb-0">
-                <div className="flex flex-wrap gap-4 items-center">
-                  <div className="w-full sm:w-1/4">
+                <div className="grid grid-cols-12 gap-4 items-start">
+                  <div className="col-span-12 sm:col-span-3">
                     <p className="text-black dark:text-white font-medium">
                       {items[index]?.name || 'Producto Desconocido'}
                     </p>
                     {items[index]?.sku && (
-                      <span className="text-xs text-gray-500">SKU: {items[index].sku}</span>
+                      <span className="text-xs text-gray-500 block">SKU: {items[index].sku}</span>
                     )}
                     <input type="hidden" {...register(`items.${index}.product_id`)} />
                   </div>
 
-                  <div className="w-full sm:w-1/6">
-                    <InputGroup
-                      name={`items.${index}.quantity`}
+                  <div className="col-span-6 sm:col-span-2 relative">
+                    <input
                       type="number"
-                      register={register}
-                      required
+                      {...register(`items.${index}.quantity`, { required: true })}
                       placeholder="1"
-                      customClasses="mb-0"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
                     />
                   </div>
 
-                  <div className="w-full sm:w-1/6">
-                    <InputGroup
-                      name={`items.${index}.unit_cost`}
+                  <div className="col-span-6 sm:col-span-2 relative">
+                    <input
                       type="number"
-                      register={register}
-                      required
+                      step="0.01"
+                      {...register(`items.${index}.unit_cost`, { required: true })}
                       placeholder="0.00"
-                      customClasses="mb-0"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
                     />
                   </div>
 
-                  <div className="w-full sm:w-1/6">
-                    <InputGroup
-                      name={`items.${index}.lot_number`}
-                      register={register}
+                  <div className="col-span-6 sm:col-span-2 relative">
+                    <input
+                      type="text"
+                      {...register(`items.${index}.lot_number`)}
                       placeholder="Lote"
-                      customClasses="mb-0"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
                     />
                   </div>
 
-                  <div className="w-full sm:w-1/6">
-                    <InputGroup
-                      name={`items.${index}.expiration_date`}
+                  <div className="col-span-6 sm:col-span-2 relative">
+                    <input
                       type="date"
-                      register={register}
-                      customClasses="mb-0"
+                      {...register(`items.${index}.expiration_date`)}
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
                     />
                   </div>
 
-                  <div className="w-full sm:w-1/12 flex justify-end">
+                  <div className="col-span-12 sm:col-span-1 flex justify-end">
                     <button
                       type="button"
                       onClick={() => remove(index)}

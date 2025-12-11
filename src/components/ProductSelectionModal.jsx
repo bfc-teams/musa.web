@@ -1,26 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import api from '@/services/api';
+import Pagination from '@/components/ui/Pagination';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export const ProductSelectionModal = ({ isOpen, onClose, onAddProducts }) => {
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
+
+  const debouncedSearch = useDebounce(searchTerm, 1000);
 
   useEffect(() => {
     if (isOpen) {
-      fetchProducts();
-      setSelectedProducts([]);
+      setCurrentPage(1);
       setSearchTerm('');
+      setSelectedProducts([]);
+      fetchProducts(1, '');
     }
   }, [isOpen]);
 
-  const fetchProducts = async () => {
+  useEffect(() => {
+    if (isOpen) {
+      fetchProducts(currentPage, debouncedSearch);
+    }
+  }, [currentPage, debouncedSearch]);
+
+  const fetchProducts = async (page, search) => {
     setLoading(true);
     try {
-      const response = await api.get('/products?limit=100');
-      setProducts(response.data.data || []);
+      const queryParams = new URLSearchParams({
+        page,
+        limit,
+        name: search, // Assuming backend filters by name with this param
+      }).toString();
+      const response = await api.get(`/products?${queryParams}`);
+
+      // Handle both mocked (array) and paginated response structures just in case
+      if (response.data.data) {
+        setProducts(response.data.data);
+        setTotalPages(response.data.pagination?.totalPages || 1);
+      } else {
+        // Fallback or different structure
+        setProducts(response.data || []);
+        setTotalPages(1);
+      }
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
@@ -41,16 +69,11 @@ export const ProductSelectionModal = ({ isOpen, onClose, onAddProducts }) => {
     onClose();
   };
 
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-boxdark">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg dark:bg-boxdark flex flex-col max-h-[90vh]">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-xl font-semibold text-black dark:text-white">
             Seleccionar Productos
@@ -60,72 +83,95 @@ export const ProductSelectionModal = ({ isOpen, onClose, onAddProducts }) => {
           </button>
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 relative">
           <input
             type="text"
-            placeholder="Buscar por nombre o SKU..."
+            placeholder="Buscar por nombre..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 pl-10 pr-4 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
+          <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div>
 
-        <div className="mb-6 max-h-60 overflow-y-auto border border-stroke rounded dark:border-strokedark">
+        <div className="flex-1 overflow-y-auto border border-stroke rounded dark:border-strokedark mb-4">
           {loading ? (
-            <p className="p-4 text-center">Cargando productos...</p>
-          ) : filteredProducts.length > 0 ? (
+            <p className="p-8 text-center text-gray-500">Cargando productos...</p>
+          ) : products.length > 0 ? (
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-2 dark:bg-meta-4">
+              <thead className="bg-gray-2 dark:bg-meta-4 sticky top-0 z-10">
                 <tr>
-                  <th className="p-3">
+                  <th className="p-3 w-10">
                     <span className="sr-only">Select</span>
                   </th>
                   <th className="p-3 font-medium text-black dark:text-white">Producto</th>
                   <th className="p-3 font-medium text-black dark:text-white">SKU</th>
-                  <th className="p-3 font-medium text-black dark:text-white">Costo</th>
+                  <th className="p-3 font-medium text-black dark:text-white">Precio Venta</th>
+                  <th className="p-3 font-medium text-black dark:text-white">Stock</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((product) => (
-                  <tr
-                    key={product.id}
-                    className="border-b border-stroke last:border-b-0 hover:bg-gray-100 dark:border-strokedark dark:hover:bg-meta-4 cursor-pointer"
-                    onClick={() => toggleProduct(product)}
-                  >
-                    <td className="p-3">
-                      <input
-                        type="checkbox"
-                        checked={!!selectedProducts.find(p => p.id === product.id)}
-                        onChange={() => { }} // Handled by row click
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                      />
-                    </td>
-                    <td className="p-3">{product.name}</td>
-                    <td className="p-3">{product.sku || '-'}</td>
-                    <td className="p-3">${Number(product.cost_price).toFixed(2)}</td>
-                  </tr>
-                ))}
+                {products.map((product) => {
+                  const isSelected = !!selectedProducts.find(p => p.id === product.id);
+                  return (
+                    <tr
+                      key={product.id}
+                      className={`border-b border-stroke last:border-b-0 hover:bg-gray-100 dark:border-strokedark dark:hover:bg-meta-4 cursor-pointer ${isSelected ? 'bg-primary/5 dark:bg-primary/20' : ''}`}
+                      onClick={() => toggleProduct(product)}
+                    >
+                      <td className="p-3">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => { }} // Handled by row click
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary pointer-events-none"
+                        />
+                      </td>
+                      <td className="p-3">{product.name}</td>
+                      <td className="p-3">{product.sku || '-'}</td>
+                      <td className="p-3">${Number(product.sale_price).toFixed(2)}</td>
+                      <td className="p-3">{product.stock || 0}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           ) : (
-            <p className="p-4 text-center text-gray-500">No se encontraron productos</p>
+            <p className="p-8 text-center text-gray-500">No se encontraron productos.</p>
           )}
         </div>
 
-        <div className="flex justify-end gap-4">
-          <button
-            onClick={onClose}
-            className="rounded border border-stroke py-2 px-6 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleAdd}
-            disabled={selectedProducts.length === 0}
-            className="rounded bg-primary py-2 px-6 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
-          >
-            Agregar ({selectedProducts.length})
-          </button>
+        {/* Pagination Controls */}
+        <div className="mb-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+
+        <div className="flex justify-between items-center border-t border-stroke pt-4 dark:border-strokedark">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {selectedProducts.length} producto(s) seleccionado(s)
+          </div>
+          <div className="flex gap-4">
+            <button
+              onClick={onClose}
+              className="rounded border border-stroke py-2 px-6 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleAdd}
+              disabled={selectedProducts.length === 0}
+              className="rounded bg-primary py-2 px-6 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+            >
+              Agregar Selección
+            </button>
+          </div>
         </div>
       </div>
     </div>

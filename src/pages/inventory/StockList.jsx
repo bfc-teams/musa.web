@@ -4,6 +4,7 @@ import { Table } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
 import { Plus } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export const StockList = () => {
   const [stock, setStock] = useState([]);
@@ -14,13 +15,15 @@ export const StockList = () => {
   const [filters, setFilters] = useState({ warehouse_id: '', product_name: '' });
   const limit = 10;
 
+  const debouncedFilters = useDebounce(filters, 1000);
+
   useEffect(() => {
     fetchWarehouses();
   }, []);
 
   useEffect(() => {
     fetchStock(currentPage);
-  }, [currentPage, filters]);
+  }, [currentPage, debouncedFilters]);
 
   const fetchWarehouses = async () => {
     try {
@@ -37,7 +40,7 @@ export const StockList = () => {
       const queryParams = new URLSearchParams({
         page,
         limit,
-        ...filters,
+        ...debouncedFilters,
       }).toString();
       const response = await api.get(`/stock?${queryParams}`);
       console.log('Stock API Response:', response.data);
@@ -58,9 +61,9 @@ export const StockList = () => {
 
   const columns = [
     {
-      header: 'Product',
+      header: 'Producto',
       accessor: 'Product.name',
-      render: (row) => row.Product?.name || 'Unknown'
+      render: (row) => row.Product?.name || 'Desconocido'
     },
     {
       header: 'SKU',
@@ -68,18 +71,18 @@ export const StockList = () => {
       render: (row) => row.Product?.sku || '-'
     },
     {
-      header: 'Warehouse',
+      header: 'Almacén',
       accessor: 'Warehouse.name',
-      render: (row) => row.Warehouse?.name || 'Unknown'
+      render: (row) => row.Warehouse?.name || 'Desconocido'
     },
-    { header: 'Lot Number', accessor: 'lot_number' },
+    { header: 'Lote', accessor: 'lot_number' },
     {
-      header: 'Expiration',
+      header: 'Vencimiento',
       accessor: 'expiration_date',
       render: (row) => row.expiration_date ? new Date(row.expiration_date).toLocaleDateString() : '-'
     },
     {
-      header: 'Quantity',
+      header: 'Disponibilidad',
       accessor: 'quantity',
       render: (row) => <span className={`font-semibold ${row.quantity < 10 ? 'text-danger' : 'text-success'}`}>{row.quantity}</span>
     },
@@ -89,14 +92,14 @@ export const StockList = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          Stock Inventory
+          Inventario de Stock
         </h2>
         <Link
           to="/inventory/transfers/new"
-          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-6 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
         >
           <Plus className="h-5 w-5" />
-          Transfer Stock
+          Transferir Stock
         </Link>
       </div>
 
@@ -110,7 +113,7 @@ export const StockList = () => {
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             >
-              <option value="">All Warehouses</option>
+              <option value="">Todos los Almacenes</option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -122,7 +125,7 @@ export const StockList = () => {
             <input
               type="text"
               name="product_name"
-              placeholder="Filter by Product Name"
+              placeholder="Filtrar por Nombre de Producto"
               value={filters.product_name}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -132,7 +135,7 @@ export const StockList = () => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <p>Cargando...</p>
       ) : (
         <>
           <Table columns={columns} data={stock} />

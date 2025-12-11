@@ -38,16 +38,16 @@ export const SalesList = () => {
   };
 
   const columns = [
-    { header: 'Date', accessor: 'date', render: (row) => new Date(row.date).toLocaleDateString() },
-    { header: 'Customer', accessor: 'customer_name' },
-    { header: 'Payment Method', accessor: 'payment_method' },
-    { header: 'Total Amount', accessor: 'total_amount', render: (row) => `$${Number(row.total_amount || 0).toFixed(2)}` },
-    { header: 'Warehouse', accessor: 'Warehouse.name', render: (row) => row.Warehouse?.name || 'N/A' },
+    { header: 'Fecha', accessor: 'date', render: (row) => new Date(row.date).toLocaleDateString() },
+    { header: 'Cliente', accessor: 'customer_name' },
+    { header: 'Método de Pago', accessor: 'payment_method' },
+    { header: 'Monto Total', accessor: 'total_amount', render: (row) => `$${Number(row.total_amount || 0).toFixed(2)}` },
+    { header: 'Almacén', accessor: 'Warehouse.name', render: (row) => row.Warehouse?.name || 'N/A' },
   ];
 
   const actions = (row) => (
     <>
-      <button className="hover:text-primary" title="View Details">
+      <button className="hover:text-primary" title="Ver Detalles">
         <Eye className="h-5 w-5" />
       </button>
     </>
@@ -57,14 +57,14 @@ export const SalesList = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          Sales (POS)
+          Ventas (POS)
         </h2>
         <Link
           to="/sales/new"
-          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-6 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
         >
           <Plus className="h-5 w-5" />
-          New Sale
+          Nueva Venta
         </Link>
       </div>
 

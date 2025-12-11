@@ -44,7 +44,7 @@ export const SupplierForm = () => {
       navigate('/inventory/suppliers');
     } catch (error) {
       console.error('Error saving supplier:', error);
-      alert('Error saving supplier');
+      alert('Error al guardar el proveedor');
     }
   };
 
@@ -52,34 +52,34 @@ export const SupplierForm = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          {isEditMode ? 'Edit Supplier' : 'Add Supplier'}
+          {isEditMode ? 'Editar Proveedor' : 'Agregar Proveedor'}
         </h2>
       </div>
 
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
           <h3 className="font-medium text-black dark:text-white">
-            Supplier Details
+            Detalles del Proveedor
           </h3>
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="p-6.5">
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
               <InputGroup
-                label="Supplier Name"
+                label="Nombre del Proveedor"
                 name="name"
                 register={register}
                 error={errors.name}
                 required
-                placeholder="Enter supplier name"
+                placeholder="Ingrese nombre del proveedor"
                 customClasses="w-full xl:w-1/2"
               />
               <InputGroup
-                label="Contact Person"
+                label="Persona de Contacto"
                 name="contact_info"
                 register={register}
                 error={errors.contact_info}
-                placeholder="Enter contact person name"
+                placeholder="Ingrese nombre del contacto"
                 customClasses="w-full xl:w-1/2"
               />
             </div>
@@ -91,34 +91,34 @@ export const SupplierForm = () => {
                 type="email"
                 register={register}
                 error={errors.email}
-                placeholder="Enter email address"
+                placeholder="Ingrese email"
                 customClasses="w-full xl:w-1/2"
               />
               <InputGroup
-                label="Phone"
+                label="Teléfono"
                 name="phone"
                 register={register}
                 error={errors.phone}
-                placeholder="Enter phone number"
+                placeholder="Ingrese teléfono"
                 customClasses="w-full xl:w-1/2"
               />
             </div>
 
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
               <InputGroup
-                label="Address"
+                label="Dirección"
                 name="address"
                 register={register}
                 error={errors.address}
-                placeholder="Enter address"
+                placeholder="Ingrese dirección"
                 customClasses="w-full xl:w-1/2"
               />
               <InputGroup
-                label="Tax ID"
+                label="RUC / NIT / Tax ID"
                 name="tax_id"
                 register={register}
                 error={errors.tax_id}
-                placeholder="Enter Tax ID"
+                placeholder="Ingrese identificación fiscal"
                 customClasses="w-full xl:w-1/2"
               />
             </div>
@@ -128,7 +128,7 @@ export const SupplierForm = () => {
               disabled={isSubmitting}
               className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              {isSubmitting ? 'Saving...' : 'Save Supplier'}
+              {isSubmitting ? 'Guardando...' : 'Guardar Proveedor'}
             </button>
           </div>
         </form>

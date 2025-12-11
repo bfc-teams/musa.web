@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { InputGroup, SelectGroup } from '@/components/ui/FormElements';
-import { ServiceSelectionModal } from '@/components/ServiceSelectionModal';
 import api from '@/services/api';
 import { Plus, Trash2, Search } from 'lucide-react';
+import { ProductSelectionModal } from '@/components/ProductSelectionModal';
 
 export const SalesForm = () => {
   const navigate = useNavigate();
   const [warehouses, setWarehouses] = useState([]);
   const [barcode, setBarcode] = useState('');
-  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [barcodeError, setBarcodeError] = useState('');
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
   const {
     register,
@@ -70,44 +70,38 @@ export const SalesForm = () => {
 
         if (products.length > 0) {
           const product = products[0];
-          // Check if already exists to increment quantity? For now just append new line or user can adjust qty
-          append({
-            item_type: 'product',
-            id: product.id,
-            name: product.name,
-            sku: product.sku,
-            quantity: 1,
-            unit_price: Number(product.sale_price),
-            lot_number: ''
-          });
+          addProductToSale(product);
           setBarcode('');
         } else {
-          setBarcodeError('Product not found');
+          setBarcodeError('Producto no encontrado');
         }
       } catch (error) {
         console.error('Error searching product:', error);
-        setBarcodeError('Error searching product');
+        setBarcodeError('Error buscando producto');
       }
     }
   };
 
-  const handleAddServices = (selectedServices) => {
-    selectedServices.forEach(service => {
-      append({
-        item_type: 'service',
-        id: service.id,
-        name: service.name,
-        quantity: 1,
-        unit_price: Number(service.base_price),
-        lot_number: ''
-      });
+  const addProductToSale = (product) => {
+    append({
+      item_type: 'product',
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      quantity: 1,
+      unit_price: Number(product.sale_price),
+      lot_number: ''
     });
+  };
+
+  const handleAddProductsFromModal = (products) => {
+    products.forEach(product => addProductToSale(product));
   };
 
   const onSubmit = async (data) => {
     try {
       if (data.items.length === 0) {
-        alert('Please add at least one item');
+        alert('Por favor agregue al menos un artículo');
         return;
       }
 
@@ -125,7 +119,7 @@ export const SalesForm = () => {
       navigate('/sales');
     } catch (error) {
       console.error('Error creating sale:', error);
-      alert('Error creating sale');
+      alert('Error al crear la venta');
     }
   };
 
@@ -133,7 +127,7 @@ export const SalesForm = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          New Sale (POS)
+          Nueva Venta (POS)
         </h2>
       </div>
 
@@ -144,12 +138,12 @@ export const SalesForm = () => {
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">
-                  Sale Details
+                  Detalles de la Venta
                 </h3>
               </div>
               <div className="p-6.5">
                 <SelectGroup
-                  label="Warehouse"
+                  label="Almacén"
                   name="warehouse_id"
                   register={register}
                   error={errors.warehouse_id}
@@ -157,27 +151,27 @@ export const SalesForm = () => {
                   options={warehouses.map(w => ({ value: w.id, label: w.name }))}
                 />
                 <InputGroup
-                  label="Customer Name"
+                  label="Nombre del Cliente"
                   name="customer_name"
                   register={register}
                   error={errors.customer_name}
                   required
-                  placeholder="Walk-in Customer"
+                  placeholder="Cliente Casual"
                 />
                 <SelectGroup
-                  label="Payment Method"
+                  label="Método de Pago"
                   name="payment_method"
                   register={register}
                   error={errors.payment_method}
                   required
                   options={[
-                    { value: 'cash', label: 'Cash' },
-                    { value: 'card', label: 'Card' },
-                    { value: 'transfer', label: 'Transfer' },
+                    { value: 'cash', label: 'Efectivo' },
+                    { value: 'card', label: 'Tarjeta' },
+                    { value: 'transfer', label: 'Transferencia' },
                   ]}
                 />
                 <InputGroup
-                  label="Date"
+                  label="Fecha"
                   name="date"
                   type="date"
                   register={register}
@@ -193,16 +187,16 @@ export const SalesForm = () => {
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
                 <h3 className="font-medium text-black dark:text-white">
-                  Summary
+                  Resumen
                 </h3>
               </div>
               <div className="p-6.5">
                 <div className="mb-4 flex justify-between">
-                  <span className="font-medium">Total Items:</span>
+                  <span className="font-medium">Total de Artículos:</span>
                   <span>{items.length}</span>
                 </div>
                 <div className="mb-4 flex justify-between text-xl font-bold text-primary">
-                  <span>Total Amount:</span>
+                  <span>Monto Total:</span>
                   <span>${totalAmount.toFixed(2)}</span>
                 </div>
                 <button
@@ -210,7 +204,7 @@ export const SalesForm = () => {
                   disabled={isSubmitting}
                   className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
                 >
-                  {isSubmitting ? 'Processing...' : 'Complete Sale'}
+                  {isSubmitting ? 'Procesando...' : 'Completar Venta'}
                 </button>
               </div>
             </div>
@@ -221,25 +215,23 @@ export const SalesForm = () => {
         <div className="mt-9 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h3 className="font-medium text-black dark:text-white">
-              Items
+              Artículos
             </h3>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => setIsServiceModalOpen(true)}
-                className="inline-flex items-center justify-center gap-2.5 rounded-md border border-primary py-2 px-4 text-center font-medium text-primary hover:bg-primary hover:text-white transition"
-              >
-                <Plus className="h-4 w-4" />
-                Add Service
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsProductModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-6 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
+            >
+              <Search className="h-5 w-5" />
+              Buscar Productos
+            </button>
           </div>
 
           <div className="p-6.5">
             {/* Barcode Input */}
             <div className="mb-6">
               <label className="mb-2.5 block text-black dark:text-white">
-                Scan Barcode / SKU (Press Enter)
+                Escanear Código de Barras / SKU (Presione Enter)
               </label>
               <div className="relative">
                 <input
@@ -247,7 +239,7 @@ export const SalesForm = () => {
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}
                   onKeyDown={handleBarcodeSubmit}
-                  placeholder="Scan or type barcode..."
+                  placeholder="Escanee o escriba código de barras..."
                   className={`w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${barcodeError ? 'border-danger focus:border-danger' : ''}`}
                   autoFocus
                 />
@@ -260,99 +252,85 @@ export const SalesForm = () => {
 
             {/* Items Table Header */}
             {fields.length > 0 && (
-              <div className="hidden sm:flex border-b border-stroke dark:border-strokedark pb-2 mb-2 font-medium text-sm text-gray-500">
-                <div className="w-1/6">Type</div>
-                <div className="w-1/3">Item</div>
-                <div className="w-1/6">Qty</div>
-                <div className="w-1/6">Price</div>
-                <div className="w-1/6 text-right">Action</div>
+              <div className="hidden sm:grid grid-cols-12 gap-4 border-b border-stroke dark:border-strokedark pb-2 mb-2 font-medium text-sm text-gray-500">
+                <div className="hidden sm:block col-span-2 md:col-span-2">SKU</div>
+                <div className="col-span-12 sm:col-span-4 md:col-span-3">Artículo</div>
+                <div className="col-span-6 sm:col-span-2 md:col-span-2">Cant.</div>
+                <div className="col-span-6 sm:col-span-2 md:col-span-2">Precio</div>
+                <div className="col-span-12 sm:col-span-2 md:col-span-3 text-right">Acción</div>
               </div>
             )}
 
             {fields.map((item, index) => {
-              const currentType = items[index]?.item_type || 'product';
               return (
                 <div key={item.id} className="mb-4 pb-4 border-b border-stroke dark:border-strokedark last:border-0 last:pb-0">
-                  <div className="flex flex-wrap gap-4 items-center">
+                  <div className="grid grid-cols-12 gap-4 items-center">
 
-                    <div className="w-full sm:w-1/6">
-                      <span className={`inline-block rounded px-2.5 py-0.5 text-sm font-medium ${currentType === 'product' ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'}`}>
-                        {currentType === 'product' ? 'Product' : 'Service'}
-                      </span>
+                    <div className="hidden sm:block col-span-2 md:col-span-2">
+                      <p className="text-sm text-black dark:text-white">
+                        {items[index]?.sku || '-'}
+                      </p>
                     </div>
 
-                    <div className="w-full sm:w-1/3">
+                    <div className="col-span-12 sm:col-span-4 md:col-span-3">
                       <p className="text-black dark:text-white font-medium">
-                        {items[index]?.name || 'Unknown Item'}
+                        {items[index]?.name || 'Artículo Desconocido'}
                       </p>
-                      {currentType === 'product' && items[index]?.sku && (
-                        <span className="text-xs text-gray-500">SKU: {items[index].sku}</span>
-                      )}
+                      {/* Show SKU here only on mobile */}
+                      <span className="sm:hidden text-xs text-gray-500 block">SKU: {items[index]?.sku || '-'}</span>
+
                       {/* Hidden inputs to maintain form state */}
                       <input type="hidden" {...register(`items.${index}.item_type`)} />
                       <input type="hidden" {...register(`items.${index}.id`)} />
                     </div>
 
-                    <div className="w-full sm:w-1/6">
-                      <InputGroup
-                        name={`items.${index}.quantity`}
+                    <div className="col-span-6 sm:col-span-2 md:col-span-2 relative">
+                      {/* Custom Input without InputGroup label/margin overhead for table */}
+                      <input
                         type="number"
-                        register={register}
-                        required
+                        {...register(`items.${index}.quantity`, { required: true })}
                         placeholder="1"
-                        customClasses="mb-0"
+                        className={`w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white ${errors.items?.[index]?.quantity ? 'border-danger' : ''}`}
                       />
                     </div>
 
-                    <div className="w-full sm:w-1/6">
-                      <InputGroup
-                        name={`items.${index}.unit_price`}
+                    <div className="col-span-6 sm:col-span-2 md:col-span-2">
+                      <input
                         type="number"
-                        register={register}
-                        required
+                        {...register(`items.${index}.unit_price`, { required: true })}
                         placeholder="0.00"
-                        customClasses="mb-0"
+                        className={`w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white ${errors.items?.[index]?.unit_price ? 'border-danger' : ''}`}
                       />
                     </div>
 
-                    <div className="w-full sm:w-1/6 flex justify-end">
+                    <div className="col-span-12 sm:col-span-2 md:col-span-3 flex justify-end">
                       <button
                         type="button"
                         onClick={() => remove(index)}
                         className="p-2 text-danger hover:bg-danger hover:bg-opacity-10 rounded"
-                        title="Remove Item"
+                        title="Eliminar Artículo"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
-                  {/* Optional Lot Number for Products */}
-                  {currentType === 'product' && (
-                    <div className="mt-2 w-full sm:w-1/3 sm:ml-[16.66%]">
-                      <input
-                        {...register(`items.${index}.lot_number`)}
-                        placeholder="Lot Number (Optional)"
-                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-1 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
-                      />
-                    </div>
-                  )}
                 </div>
               )
             })}
 
             {fields.length === 0 && (
               <div className="text-center py-8 text-gray-500">
-                No items added. Scan a barcode or add a service.
+                No hay artículos agregados. Escanee un código de barras o busque productos.
               </div>
             )}
           </div>
         </div>
       </form>
 
-      <ServiceSelectionModal
-        isOpen={isServiceModalOpen}
-        onClose={() => setIsServiceModalOpen(false)}
-        onAddServices={handleAddServices}
+      <ProductSelectionModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        onAddProducts={handleAddProductsFromModal}
       />
     </>
   );

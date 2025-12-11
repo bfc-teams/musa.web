@@ -1,16 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, ShoppingBag, Settings, LogOut, ArrowLeft, ChevronDown, Package, Scissors, ShoppingCart } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingBag, Settings, LogOut, ArrowLeft, ChevronDown, Package, Scissors, ShoppingCart, FileText } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import SidebarLinkGroup from './SidebarLinkGroup';
 
 const sidebarItems = [
   {
     icon: LayoutDashboard,
-    label: 'Dashboard',
+    label: 'Inicio',
     route: '/',
   },
   { icon: Users, label: 'Empleados', route: '/employees' },
+  { icon: Users, label: 'Clientes', route: '/customers' },
   {
     icon: Package,
     label: 'Inventario',
@@ -25,7 +26,23 @@ const sidebarItems = [
   },
   { icon: ShoppingBag, label: 'Compras', route: '/inventory/purchases' },
   { icon: ShoppingCart, label: 'Ventas', route: '/sales' },
-  { icon: Scissors, label: 'Servicios', route: '/services' },
+  {
+    icon: Scissors,
+    label: 'Servicios',
+    route: '/services',
+    children: [
+      { label: 'Catálogo de Servicios', route: '/services' },
+      { label: 'Órdenes de Servicio', route: '/service-orders' },
+    ],
+  },
+  {
+    icon: FileText,
+    label: 'Reportes',
+    route: '/reports',
+    children: [
+      { label: 'Rendimiento Empleados', route: '/reports/employee-performance' },
+    ],
+  },
   { icon: Settings, label: 'Configuración', route: '/settings' },
 ];
 
@@ -106,7 +123,7 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }) {
           {/* <!-- Menu Group --> */}
           <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
-              MENU
+              MENÚ
             </h3>
 
             <ul className="mb-6 flex flex-col gap-1.5">
@@ -190,7 +207,7 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }) {
           {/* <!-- Others Group --> */}
           <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
-              OTHERS
+              OTROS
             </h3>
             <ul className="mb-6 flex flex-col gap-1.5">
               <li>
@@ -199,7 +216,7 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }) {
                   className="group relative flex w-full items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4"
                 >
                   <LogOut className="h-5 w-5" />
-                  Log Out
+                  Cerrar Sesión
                 </button>
               </li>
             </ul>

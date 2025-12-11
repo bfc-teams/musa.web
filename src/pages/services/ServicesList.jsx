@@ -4,6 +4,7 @@ import { Table } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
 import { Edit, Trash2, Plus } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export const ServicesList = () => {
   const [services, setServices] = useState([]);
@@ -13,9 +14,11 @@ export const ServicesList = () => {
   const [filters, setFilters] = useState({ name: '', category: '' });
   const limit = 10;
 
+  const debouncedFilters = useDebounce(filters, 1000);
+
   useEffect(() => {
     fetchServices(currentPage);
-  }, [currentPage, filters]);
+  }, [currentPage, debouncedFilters]);
 
   const fetchServices = async (page) => {
     setLoading(true);
@@ -23,7 +26,7 @@ export const ServicesList = () => {
       const queryParams = new URLSearchParams({
         page,
         limit,
-        ...filters,
+        ...debouncedFilters,
       }).toString();
       const response = await api.get(`/services?${queryParams}`);
       setServices(response.data.data || []);
@@ -42,7 +45,7 @@ export const ServicesList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this service?')) {
+    if (window.confirm('¿Está seguro de que desea eliminar este servicio?')) {
       try {
         await api.delete(`/services/${id}`);
         fetchServices(currentPage);
@@ -53,10 +56,10 @@ export const ServicesList = () => {
   };
 
   const columns = [
-    { header: 'Name', accessor: 'name' },
-    { header: 'Duration (min)', accessor: 'duration_minutes' },
-    { header: 'Price', accessor: 'base_price', render: (row) => `$${Number(row.base_price || 0).toFixed(2)}` },
-    { header: 'Commission (%)', accessor: 'default_commission_percent', render: (row) => `${row.default_commission_percent}%` },
+    { header: 'Nombre', accessor: 'name' },
+    { header: 'Duración (min)', accessor: 'duration_minutes' },
+    { header: 'Precio', accessor: 'base_price', render: (row) => `$${Number(row.base_price || 0).toFixed(2)}` },
+    { header: 'Comisión (%)', accessor: 'default_commission_percent', render: (row) => `${row.default_commission_percent}%` },
   ];
 
   const actions = (row) => (
@@ -64,14 +67,14 @@ export const ServicesList = () => {
       <Link
         to={`/services/${row.id}/edit`}
         className="hover:text-primary"
-        title="Edit"
+        title="Editar"
       >
         <Edit className="h-5 w-5" />
       </Link>
       <button
         onClick={() => handleDelete(row.id)}
         className="hover:text-meta-1"
-        title="Delete"
+        title="Eliminar"
       >
         <Trash2 className="h-5 w-5" />
       </button>
@@ -82,14 +85,14 @@ export const ServicesList = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          Services
+          Servicios
         </h2>
         <Link
           to="/services/new"
           className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
         >
           <Plus className="h-5 w-5" />
-          Add Service
+          Agregar Servicio
         </Link>
       </div>
 
@@ -100,7 +103,7 @@ export const ServicesList = () => {
             <input
               type="text"
               name="name"
-              placeholder="Filter by Name"
+              placeholder="Filtrar por Nombre"
               value={filters.name}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -113,19 +116,19 @@ export const ServicesList = () => {
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             >
-              <option value="">All Categories</option>
-              <option value="Hair">Hair</option>
-              <option value="Nails">Nails</option>
-              <option value="Skin">Skin</option>
-              <option value="Massage">Massage</option>
-              <option value="Other">Other</option>
+              <option value="">Todas las Categorías</option>
+              <option value="Hair">Cabello</option>
+              <option value="Nails">Uñas</option>
+              <option value="Skin">Piel</option>
+              <option value="Massage">Masaje</option>
+              <option value="Other">Otro</option>
             </select>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <p>Cargando...</p>
       ) : (
         <>
           <Table columns={columns} data={services} actions={actions} />

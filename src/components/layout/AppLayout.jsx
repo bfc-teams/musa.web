@@ -1,10 +1,18 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isAuthenticated, token } = useAuthStore();
+  const location = useLocation();
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated && !token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">

@@ -74,7 +74,7 @@ const DropdownUser = () => {
               className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
             >
               <User className="h-5 w-5" />
-              My Profile
+              Mi Perfil
             </Link>
           </li>
           <li>
@@ -83,7 +83,7 @@ const DropdownUser = () => {
               className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
             >
               <Settings className="h-5 w-5" />
-              Account Settings
+              Configuración
             </Link>
           </li>
         </ul>
@@ -92,7 +92,7 @@ const DropdownUser = () => {
           className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
         >
           <LogOut className="h-5 w-5" />
-          Log Out
+          Cerrar Sesión
         </button>
       </div>
       {/* <!-- Dropdown End --> */}

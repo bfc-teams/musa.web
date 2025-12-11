@@ -25,6 +25,14 @@ export function Login() {
     resolver: zodResolver(loginSchema),
   });
 
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
+
   const onSubmit = async (data) => {
     try {
       await login(data);

@@ -60,18 +60,18 @@ export const PurchasesList = () => {
   };
 
   const columns = [
-    { header: 'Date', accessor: 'date', render: (row) => new Date(row.date).toLocaleDateString() },
-    { header: 'Invoice #', accessor: 'invoice_number' },
-    { header: 'Supplier', accessor: 'Supplier.name', render: (row) => row.Supplier?.name || 'N/A' },
-    { header: 'Warehouse', accessor: 'Warehouse.name', render: (row) => row.Warehouse?.name || 'N/A' },
-    { header: 'Total Cost', accessor: 'total_cost', render: (row) => `$${Number(row.total_cost || 0).toFixed(2)}` },
-    { header: 'Status', accessor: 'status' },
+    { header: 'Fecha', accessor: 'date', render: (row) => new Date(row.date).toLocaleDateString() },
+    { header: 'Factura #', accessor: 'invoice_number' },
+    { header: 'Proveedor', accessor: 'Supplier.name', render: (row) => row.Supplier?.name || 'N/A' },
+    { header: 'Almacén', accessor: 'Warehouse.name', render: (row) => row.Warehouse?.name || 'N/A' },
+    { header: 'Costo Total', accessor: 'total_cost', render: (row) => `$${Number(row.total_cost || 0).toFixed(2)}` },
+    { header: 'Estado', accessor: 'status' },
   ];
 
   const actions = (row) => (
     <>
       {/* View details could go here */}
-      <button className="hover:text-primary" title="View Details">
+      <button className="hover:text-primary" title="Ver Detalles">
         <Eye className="h-5 w-5" />
       </button>
     </>
@@ -81,14 +81,14 @@ export const PurchasesList = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          Purchases
+          Compras
         </h2>
         <Link
           to="/inventory/purchases/new"
-          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-6 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
         >
           <Plus className="h-5 w-5" />
-          New Purchase
+          Nueva Compra
         </Link>
       </div>
 

@@ -48,7 +48,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-black dark:text-white">
-            Showing page <span className="font-medium">{currentPage}</span> of{' '}
+            Páginas <span className="font-medium">{currentPage}</span> de{' '}
             <span className="font-medium">{totalPages}</span>
           </p>
         </div>
@@ -62,7 +62,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
               disabled={currentPage === 1}
               className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-stroke hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 dark:ring-strokedark dark:hover:bg-meta-4"
             >
-              <span className="sr-only">Previous</span>
+              <span className="sr-only">Anterior</span>
               <ChevronLeft className="h-5 w-5" aria-hidden="true" />
             </button>
 
@@ -72,8 +72,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                 onClick={() => onPageChange(page)}
                 aria-current={page === currentPage ? 'page' : undefined}
                 className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0 ${page === currentPage
-                    ? 'z-10 bg-primary text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
-                    : 'text-black ring-1 ring-inset ring-stroke hover:bg-gray-50 dark:text-white dark:ring-strokedark dark:hover:bg-meta-4'
+                  ? 'z-10 bg-primary text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+                  : 'text-black ring-1 ring-inset ring-stroke hover:bg-gray-50 dark:text-white dark:ring-strokedark dark:hover:bg-meta-4'
                   }`}
               >
                 {page}
@@ -85,7 +85,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
               disabled={currentPage === totalPages}
               className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-stroke hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 dark:ring-strokedark dark:hover:bg-meta-4"
             >
-              <span className="sr-only">Next</span>
+              <span className="sr-only">Siguiente</span>
               <ChevronRight className="h-5 w-5" aria-hidden="true" />
             </button>
           </nav>

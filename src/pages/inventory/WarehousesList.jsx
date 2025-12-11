@@ -4,6 +4,7 @@ import { Table } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
 import { Edit, Trash2, Plus } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export const WarehousesList = () => {
   const [warehouses, setWarehouses] = useState([]);
@@ -13,9 +14,11 @@ export const WarehousesList = () => {
   const [filters, setFilters] = useState({ name: '', location: '' });
   const limit = 10;
 
+  const debouncedFilters = useDebounce(filters, 1000);
+
   useEffect(() => {
     fetchWarehouses(currentPage);
-  }, [currentPage, filters]);
+  }, [currentPage, debouncedFilters]);
 
   const fetchWarehouses = async (page) => {
     setLoading(true);
@@ -23,7 +26,7 @@ export const WarehousesList = () => {
       const queryParams = new URLSearchParams({
         page,
         limit,
-        ...filters,
+        ...debouncedFilters,
       }).toString();
       const response = await api.get(`/warehouses?${queryParams}`);
       console.log('Warehouses API Response:', response.data);
@@ -43,7 +46,7 @@ export const WarehousesList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this warehouse?')) {
+    if (window.confirm('¿Está seguro de que desea eliminar este almacén?')) {
       try {
         await api.delete(`/warehouses/${id}`);
         fetchWarehouses(currentPage);
@@ -54,10 +57,10 @@ export const WarehousesList = () => {
   };
 
   const columns = [
-    { header: 'Name', accessor: 'name' },
-    { header: 'Location', accessor: 'location' },
-    { header: 'Phone', accessor: 'phone' },
-    { header: 'Description', accessor: 'description' },
+    { header: 'Nombre', accessor: 'name' },
+    { header: 'Ubicación', accessor: 'location' },
+    { header: 'Teléfono', accessor: 'phone' },
+    { header: 'Descripción', accessor: 'description' },
   ];
 
   const actions = (row) => (
@@ -65,14 +68,14 @@ export const WarehousesList = () => {
       <Link
         to={`/inventory/warehouses/${row.id}/edit`}
         className="hover:text-primary"
-        title="Edit"
+        title="Editar"
       >
         <Edit className="h-5 w-5" />
       </Link>
       <button
         onClick={() => handleDelete(row.id)}
         className="hover:text-meta-1"
-        title="Delete"
+        title="Eliminar"
       >
         <Trash2 className="h-5 w-5" />
       </button>
@@ -83,14 +86,14 @@ export const WarehousesList = () => {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          Warehouses
+          Almacenes
         </h2>
         <Link
           to="/inventory/warehouses/new"
-          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-6 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
         >
           <Plus className="h-5 w-5" />
-          Add Warehouse
+          Agregar Almacén
         </Link>
       </div>
 
@@ -101,7 +104,7 @@ export const WarehousesList = () => {
             <input
               type="text"
               name="name"
-              placeholder="Filter by Name"
+              placeholder="Filtrar por Nombre"
               value={filters.name}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -111,7 +114,7 @@ export const WarehousesList = () => {
             <input
               type="text"
               name="location"
-              placeholder="Filter by Location"
+              placeholder="Filtrar por Ubicación"
               value={filters.location}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -121,7 +124,7 @@ export const WarehousesList = () => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <p>Cargando...</p>
       ) : (
         <>
           <Table columns={columns} data={warehouses} actions={actions} />

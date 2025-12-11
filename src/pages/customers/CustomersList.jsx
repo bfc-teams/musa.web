@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import { Table } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
-import { Edit, Trash2, Plus } from 'lucide-react';
+import { Edit, Plus, Trash2 } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 
-export const SuppliersList = () => {
-  const [suppliers, setSuppliers] = useState([]);
-  const [loading, setLoading] = useState(true);
+export const CustomersList = () => {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState({ name: '', email: '' });
@@ -17,10 +17,10 @@ export const SuppliersList = () => {
   const debouncedFilters = useDebounce(filters, 1000);
 
   useEffect(() => {
-    fetchSuppliers(currentPage);
+    fetchCustomers(currentPage);
   }, [currentPage, debouncedFilters]);
 
-  const fetchSuppliers = async (page) => {
+  const fetchCustomers = async (page) => {
     setLoading(true);
     try {
       const queryParams = new URLSearchParams({
@@ -28,45 +28,46 @@ export const SuppliersList = () => {
         limit,
         ...debouncedFilters,
       }).toString();
-      const response = await api.get(`/suppliers?${queryParams}`);
-      console.log('Suppliers API Response:', response.data);
-      setSuppliers(response.data.data || []);
+      const response = await api.get(`/customers?${queryParams}`);
+      setCustomers(response.data.data || []);
       setTotalPages(response.data.pagination?.totalPages || 1);
     } catch (error) {
-      console.error('Error fetching suppliers:', error);
+      console.error('Error fetching customers:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('¿Estás seguro de eliminar este cliente?')) {
+      try {
+        await api.delete(`/customers/${id}`);
+        fetchCustomers(currentPage);
+      } catch (error) {
+        console.error('Error deleting customer:', error);
+        alert('Error al eliminar cliente');
+      }
     }
   };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
-    setCurrentPage(1); // Reset to first page on filter change
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Está seguro de que desea eliminar este proveedor?')) {
-      try {
-        await api.delete(`/suppliers/${id}`);
-        fetchSuppliers(currentPage);
-      } catch (error) {
-        console.error('Error deleting supplier:', error);
-      }
-    }
+    setCurrentPage(1);
   };
 
   const columns = [
     { header: 'Nombre', accessor: 'name' },
-    { header: 'Contacto', accessor: 'contact_info' },
-    { header: 'Teléfono', accessor: 'phone' },
-    { header: 'Email', accessor: 'email' },
+    { header: 'RUT/DNI', accessor: 'documentIdentification', render: (row) => row.documentIdentification || '-' },
+    { header: 'Email', accessor: 'email', render: (row) => row.email || '-' },
+    { header: 'Teléfono', accessor: 'phone', render: (row) => row.phone || '-' },
+    { header: 'Ciudad', accessor: 'city', render: (row) => row.city || '-' },
   ];
 
   const actions = (row) => (
-    <>
+    <div className="flex items-center gap-2">
       <Link
-        to={`/inventory/suppliers/${row.id}/edit`}
+        to={`/customers/${row.id}`}
         className="hover:text-primary"
         title="Editar"
       >
@@ -74,26 +75,26 @@ export const SuppliersList = () => {
       </Link>
       <button
         onClick={() => handleDelete(row.id)}
-        className="hover:text-meta-1"
+        className="hover:text-danger"
         title="Eliminar"
       >
         <Trash2 className="h-5 w-5" />
       </button>
-    </>
+    </div>
   );
 
   return (
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          Proveedores
+          Clientes
         </h2>
         <Link
-          to="/inventory/suppliers/new"
+          to="/customers/new"
           className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-6 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
         >
           <Plus className="h-5 w-5" />
-          Agregar Proveedor
+          Nuevo Cliente
         </Link>
       </div>
 
@@ -104,7 +105,7 @@ export const SuppliersList = () => {
             <input
               type="text"
               name="name"
-              placeholder="Filtrar por Nombre"
+              placeholder="Buscar por Nombre..."
               value={filters.name}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -114,7 +115,7 @@ export const SuppliersList = () => {
             <input
               type="text"
               name="email"
-              placeholder="Filtrar por Email"
+              placeholder="Buscar por Email..."
               value={filters.email}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -127,7 +128,7 @@ export const SuppliersList = () => {
         <p>Cargando...</p>
       ) : (
         <>
-          <Table columns={columns} data={suppliers} actions={actions} />
+          <Table columns={columns} data={customers} actions={actions} />
           <div className="mt-4">
             <Pagination
               currentPage={currentPage}
