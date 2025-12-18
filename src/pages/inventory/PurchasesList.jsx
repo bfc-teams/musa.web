@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import { formatCurrency, formatDate } from '@/utils/formatUtils';
 import { Link } from 'react-router-dom';
 import { Table } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
 import { Plus, Eye } from 'lucide-react';
+import { ItemDetailsModal } from '@/components/ItemDetailsModal';
 
 export const PurchasesList = () => {
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedPurchase, setSelectedPurchase] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const limit = 10;
 
   useEffect(() => {
@@ -60,7 +63,7 @@ export const PurchasesList = () => {
   };
 
   const columns = [
-    { header: 'Fecha', accessor: 'date', render: (row) => new Date(row.date).toLocaleDateString() },
+    { header: 'Fecha', accessor: 'date', render: (row) => formatDate(row.date) },
     { header: 'Factura #', accessor: 'invoice_number' },
     { header: 'Proveedor', accessor: 'Supplier.name', render: (row) => row.Supplier?.name || 'N/A' },
     { header: 'Almacén', accessor: 'Warehouse.name', render: (row) => row.Warehouse?.name || 'N/A' },
@@ -68,10 +71,24 @@ export const PurchasesList = () => {
     { header: 'Estado', accessor: 'status' },
   ];
 
+  const fetchPurchaseDetails = async (id) => {
+    try {
+      const response = await api.get(`/purchases/${id}`);
+      setSelectedPurchase(response.data);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching purchase details:', error);
+      alert('Error al cargar los detalles de la compra');
+    }
+  };
+
   const actions = (row) => (
     <>
-      {/* View details could go here */}
-      <button className="hover:text-primary" title="Ver Detalles">
+      <button
+        className="hover:text-primary"
+        title="Ver Detalles"
+        onClick={() => fetchPurchaseDetails(row.id)}
+      >
         <Eye className="h-5 w-5" />
       </button>
     </>
@@ -109,6 +126,14 @@ export const PurchasesList = () => {
           </div>
         </>
       )}
+
+      <ItemDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={`Detalles de Compra #${selectedPurchase?.invoice_number || selectedPurchase?.id}`}
+        items={selectedPurchase?.PurchaseItems}
+        type="purchase"
+      />
     </>
   );
 };

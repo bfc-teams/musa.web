@@ -3,8 +3,9 @@ import { X, Search } from 'lucide-react';
 import api from '@/services/api';
 import Pagination from '@/components/ui/Pagination';
 import { useDebounce } from '@/hooks/useDebounce';
+import { formatCurrency } from '@/utils/formatUtils';
 
-export const ProductSelectionModal = ({ isOpen, onClose, onAddProducts }) => {
+export const ProductSelectionModal = ({ isOpen, onClose, onAddProducts, warehouseId }) => {
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,7 @@ export const ProductSelectionModal = ({ isOpen, onClose, onAddProducts }) => {
       setSelectedProducts([]);
       fetchProducts(1, '');
     }
-  }, [isOpen]);
+  }, [isOpen, warehouseId]); // Re-fetch if warehouse changes while open (unlikely but safe)
 
   useEffect(() => {
     if (isOpen) {
@@ -33,11 +34,15 @@ export const ProductSelectionModal = ({ isOpen, onClose, onAddProducts }) => {
   const fetchProducts = async (page, search) => {
     setLoading(true);
     try {
-      const queryParams = new URLSearchParams({
+      const params = {
         page,
         limit,
-        name: search, // Assuming backend filters by name with this param
-      }).toString();
+        name: search,
+        stock: 'true'
+      };
+      if (warehouseId) params.warehouse_id = warehouseId;
+
+      const queryParams = new URLSearchParams(params).toString();
       const response = await api.get(`/products?${queryParams}`);
 
       // Handle both mocked (array) and paginated response structures just in case
@@ -132,8 +137,10 @@ export const ProductSelectionModal = ({ isOpen, onClose, onAddProducts }) => {
                       </td>
                       <td className="p-3">{product.name}</td>
                       <td className="p-3">{product.sku || '-'}</td>
-                      <td className="p-3">${Number(product.sale_price).toFixed(2)}</td>
-                      <td className="p-3">{product.stock || 0}</td>
+                      <td className="p-3">{formatCurrency(product.sale_price)}</td>
+                      <td className="p-3">
+                        {product.ProductStocks?.[0]?.quantity || 0}
+                      </td>
                     </tr>
                   );
                 })}

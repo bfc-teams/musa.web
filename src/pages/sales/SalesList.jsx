@@ -4,12 +4,17 @@ import { Table } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
 import { Plus, Eye } from 'lucide-react';
+import { formatCurrency, formatDate } from '@/utils/formatUtils';
+
+
 
 export const SalesList = () => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedSale, setSelectedSale] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const limit = 10;
 
   useEffect(() => {
@@ -38,16 +43,31 @@ export const SalesList = () => {
   };
 
   const columns = [
-    { header: 'Fecha', accessor: 'date', render: (row) => new Date(row.date).toLocaleDateString() },
+    { header: 'Fecha', accessor: 'date', render: (row) => formatDate(row.date) },
     { header: 'Cliente', accessor: 'customer_name' },
     { header: 'Método de Pago', accessor: 'payment_method' },
-    { header: 'Monto Total', accessor: 'total_amount', render: (row) => `$${Number(row.total_amount || 0).toFixed(2)}` },
+    { header: 'Monto Total', accessor: 'total_amount', render: (row) => formatCurrency(row.total_amount) },
     { header: 'Almacén', accessor: 'Warehouse.name', render: (row) => row.Warehouse?.name || 'N/A' },
   ];
 
+  const fetchSaleDetails = async (id) => {
+    try {
+      const response = await api.get(`/sales/${id}`);
+      setSelectedSale(response.data);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching sale details:', error);
+      alert('Error al cargar los detalles de la venta');
+    }
+  };
+
   const actions = (row) => (
     <>
-      <button className="hover:text-primary" title="Ver Detalles">
+      <button
+        className="hover:text-primary"
+        title="Ver Detalles"
+        onClick={() => fetchSaleDetails(row.id)}
+      >
         <Eye className="h-5 w-5" />
       </button>
     </>
@@ -84,6 +104,14 @@ export const SalesList = () => {
           </div>
         </>
       )}
+
+      <ItemDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={`Detalles de Venta #${selectedSale?.id}`}
+        items={selectedSale?.SaleItems}
+        type="sale"
+      />
     </>
   );
 };

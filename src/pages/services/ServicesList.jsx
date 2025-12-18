@@ -5,6 +5,7 @@ import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
+import { formatCurrency } from '@/utils/formatUtils';
 
 export const ServicesList = () => {
   const [services, setServices] = useState([]);
@@ -58,7 +59,7 @@ export const ServicesList = () => {
   const columns = [
     { header: 'Nombre', accessor: 'name' },
     { header: 'Duración (min)', accessor: 'duration_minutes' },
-    { header: 'Precio', accessor: 'base_price', render: (row) => `$${Number(row.base_price || 0).toFixed(2)}` },
+    { header: 'Precio', accessor: 'base_price', render: (row) => formatCurrency(row.base_price) },
     { header: 'Comisión (%)', accessor: 'default_commission_percent', render: (row) => `${row.default_commission_percent}%` },
   ];
 

@@ -75,12 +75,6 @@ export const StockList = () => {
       accessor: 'Warehouse.name',
       render: (row) => row.Warehouse?.name || 'Desconocido'
     },
-    { header: 'Lote', accessor: 'lot_number' },
-    {
-      header: 'Vencimiento',
-      accessor: 'expiration_date',
-      render: (row) => row.expiration_date ? new Date(row.expiration_date).toLocaleDateString() : '-'
-    },
     {
       header: 'Disponibilidad',
       accessor: 'quantity',

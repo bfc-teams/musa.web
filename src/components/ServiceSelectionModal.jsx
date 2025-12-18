@@ -52,7 +52,7 @@ export const ServiceSelectionModal = ({ isOpen, onClose, onAddServices }) => {
       <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-boxdark">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-xl font-semibold text-black dark:text-white">
-            Select Services
+            Seleccionar Servicios
           </h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
             <X className="h-6 w-6" />
@@ -62,7 +62,7 @@ export const ServiceSelectionModal = ({ isOpen, onClose, onAddServices }) => {
         <div className="mb-4">
           <input
             type="text"
-            placeholder="Search services..."
+            placeholder="Buscar servicios..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -71,16 +71,16 @@ export const ServiceSelectionModal = ({ isOpen, onClose, onAddServices }) => {
 
         <div className="mb-6 max-h-60 overflow-y-auto border border-stroke rounded dark:border-strokedark">
           {loading ? (
-            <p className="p-4 text-center">Loading services...</p>
+            <p className="p-4 text-center">Cargando servicios...</p>
           ) : filteredServices.length > 0 ? (
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-2 dark:bg-meta-4">
                 <tr>
                   <th className="p-3">
-                    <span className="sr-only">Select</span>
+                    <span className="sr-only">Seleccionar</span>
                   </th>
-                  <th className="p-3 font-medium text-black dark:text-white">Service Name</th>
-                  <th className="p-3 font-medium text-black dark:text-white">Price</th>
+                  <th className="p-3 font-medium text-black dark:text-white">Servicio</th>
+                  <th className="p-3 font-medium text-black dark:text-white">Precio</th>
                 </tr>
               </thead>
               <tbody>
@@ -105,7 +105,7 @@ export const ServiceSelectionModal = ({ isOpen, onClose, onAddServices }) => {
               </tbody>
             </table>
           ) : (
-            <p className="p-4 text-center text-gray-500">No services found</p>
+            <p className="p-4 text-center text-gray-500">No se encontraron servicios</p>
           )}
         </div>
 
@@ -114,14 +114,14 @@ export const ServiceSelectionModal = ({ isOpen, onClose, onAddServices }) => {
             onClick={onClose}
             className="rounded border border-stroke py-2 px-6 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           >
-            Cancel
+            Cancelar
           </button>
           <button
             onClick={handleAdd}
             disabled={selectedServices.length === 0}
             className="rounded bg-primary py-2 px-6 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
           >
-            Add Selected ({selectedServices.length})
+            Agregar Seleccionados ({selectedServices.length})
           </button>
         </div>
       </div>

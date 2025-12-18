@@ -5,6 +5,7 @@ import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
+import { formatCurrency } from '@/utils/formatUtils';
 
 export const ProductsList = () => {
   const [products, setProducts] = useState([]);
@@ -62,7 +63,7 @@ export const ProductsList = () => {
     { header: 'Nombre', accessor: 'name' },
     { header: 'SKU', accessor: 'sku' },
     { header: 'Categoría', accessor: 'category' },
-    { header: 'Precio', accessor: 'sale_price', render: (row) => `$${Number(row.sale_price || 0).toFixed(2)}` },
+    { header: 'Precio', accessor: 'sale_price', render: (row) => formatCurrency(row.sale_price) },
     {
       header: 'Stock',
       accessor: 'stock',

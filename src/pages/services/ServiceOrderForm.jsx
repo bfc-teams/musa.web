@@ -260,12 +260,12 @@ export const ServiceOrderForm = () => {
                   />
                 </div>
 
-                <div className="mt-4">
+                {/* <div className="mt-4">
                   <label className="flex items-center gap-2">
                     <input type="checkbox" {...register('is_courtesy')} className="h-5 w-5" />
                     <span>Es Cortesía / Sin Cobro Inmediato</span>
                   </label>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

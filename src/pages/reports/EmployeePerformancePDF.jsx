@@ -1,5 +1,6 @@
 import React from 'react';
 import { Document, Page } from '@htmldocs/react';
+import { formatDate } from '@/utils/formatUtils';
 
 export const EmployeePerformancePDF = ({ data, startDate, endDate }) => {
   return (
@@ -20,7 +21,7 @@ export const EmployeePerformancePDF = ({ data, startDate, endDate }) => {
                 <th className="p-2 text-left text-xs font-bold text-gray-600">Empleado</th>
                 <th className="p-2 text-left text-xs font-bold text-gray-600">Rol</th>
                 <th className="p-2 text-center text-xs font-bold text-gray-600">Servicios</th>
-                <th className="p-2 text-right text-xs font-bold text-gray-600">Ventas</th>
+                <th className="p-2 text-right text-xs font-bold text-gray-600">Monto</th>
                 <th className="p-2 text-right text-xs font-bold text-gray-600">G. Empleado</th>
                 <th className="p-2 text-right text-xs font-bold text-gray-600">G. Empresa</th>
               </tr>
@@ -32,9 +33,9 @@ export const EmployeePerformancePDF = ({ data, startDate, endDate }) => {
                     <td className="p-2 text-xs">{item.employeeName}</td>
                     <td className="p-2 text-xs">{item.employeeRole}</td>
                     <td className="p-2 text-center text-xs">{item.serviceCount}</td>
-                    <td className="p-2 text-right text-xs">${item.totalSales.toFixed(2)}</td>
-                    <td className="p-2 text-right text-xs text-green-600">${item.totalCommission.toFixed(2)}</td>
-                    <td className="p-2 text-right text-xs text-blue-600">${item.totalCompanyProfit?.toFixed(2) || '0.00'}</td>
+                    <td className="p-2 text-right text-xs">Bs. {item.totalSales.toFixed(2)}</td>
+                    <td className="p-2 text-right text-xs text-green-600">Bs. {item.totalCommission.toFixed(2)}</td>
+                    <td className="p-2 text-right text-xs text-blue-600">Bs. {item.totalCompanyProfit?.toFixed(2) || '0.00'}</td>
                   </tr>
                   {/* Detailed View - Sub-table */}
                   {item.services && item.services.length > 0 && (
@@ -43,21 +44,23 @@ export const EmployeePerformancePDF = ({ data, startDate, endDate }) => {
                         <table className="w-full mb-2">
                           <thead>
                             <tr>
-                              <th className="text-[10px] text-gray-500 text-left w-1/3">Servicio</th>
                               <th className="text-[10px] text-gray-500 text-left">Fecha</th>
+                              <th className="text-[10px] text-gray-500 text-left w-1/3">Servicio</th>
                               <th className="text-[10px] text-gray-500 text-right">Precio</th>
-                              <th className="text-[10px] text-gray-500 text-right">Comisión</th>
+                              <th className="text-[10px] text-gray-500 text-right">%</th>
+                              <th className="text-[10px] text-gray-500 text-right">G. Empleado</th>
                               <th className="text-[10px] text-gray-500 text-right">G. Empresa</th>
                             </tr>
                           </thead>
                           <tbody>
                             {item.services.map((svc, idx) => (
                               <tr key={idx} className="border-b border-gray-100 last:border-0">
+                                <td className="text-[10px] text-gray-600 py-1">{svc.date ? formatDate(svc.date) : '-'}</td>
                                 <td className="text-[10px] text-gray-600 py-1">{svc.serviceName}</td>
-                                <td className="text-[10px] text-gray-600 py-1">{svc.date ? svc.date.split('T')[0] : '-'}</td>
-                                <td className="text-[10px] text-gray-600 py-1 text-right">${svc.price.toFixed(2)}</td>
-                                <td className="text-[10px] text-green-600 py-1 text-right">${svc.commission.toFixed(2)}</td>
-                                <td className="text-[10px] text-blue-600 py-1 text-right">${svc.companyProfit?.toFixed(2) || '0.00'}</td>
+                                <td className="text-[10px] text-gray-600 py-1 text-right">Bs. {svc.price.toFixed(2)}</td>
+                                <td className="text-[10px] text-gray-600 py-1 text-right">{svc.percentage}%</td>
+                                <td className="text-[10px] text-green-600 py-1 text-right">Bs. {svc.commission.toFixed(2)}</td>
+                                <td className="text-[10px] text-blue-600 py-1 text-right">Bs. {svc.companyProfit?.toFixed(2) || '0.00'}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -75,13 +78,13 @@ export const EmployeePerformancePDF = ({ data, startDate, endDate }) => {
                   {data.reduce((acc, curr) => acc + curr.serviceCount, 0)}
                 </td>
                 <td className="p-2 text-right text-xs">
-                  ${data.reduce((acc, curr) => acc + (curr.totalSales || 0), 0).toFixed(2)}
+                  Bs. {data.reduce((acc, curr) => acc + (curr.totalSales || 0), 0).toFixed(2)}
                 </td>
                 <td className="p-2 text-right text-xs text-green-600">
-                  ${data.reduce((acc, curr) => acc + (curr.totalCommission || 0), 0).toFixed(2)}
+                  Bs. {data.reduce((acc, curr) => acc + (curr.totalCommission || 0), 0).toFixed(2)}
                 </td>
                 <td className="p-2 text-right text-xs text-blue-600">
-                  ${data.reduce((acc, curr) => acc + (curr.totalCompanyProfit || 0), 0).toFixed(2)}
+                  Bs. {data.reduce((acc, curr) => acc + (curr.totalCompanyProfit || 0), 0).toFixed(2)}
                 </td>
               </tr>
             </tfoot>

@@ -18,7 +18,7 @@ export const Table = ({ columns, data, actions }) => {
               ))}
               {actions && (
                 <th className="py-4 px-4 font-medium text-black dark:text-white">
-                  Actions
+                  Acción
                 </th>
               )}
             </tr>

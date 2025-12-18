@@ -28,7 +28,7 @@ export const useAuthStore = create((set) => ({
         set({
           isAuthenticated: true,
           token: response.data.token,
-          user: response.data.user || { username: credentials.username }, // Fallback if user not in response
+          user: response.data.user || { username: credentials.username, role: response.data.role }, // Fallback if user not in response
           isLoading: false
         })
       } else {

@@ -25,7 +25,15 @@ import { ServiceOrderForm } from '@/pages/services/ServiceOrderForm'
 import { CustomersList } from '@/pages/customers/CustomersList';
 import { CustomerForm } from '@/pages/customers/CustomerForm';
 import { EmployeePerformanceReport } from '@/pages/reports/EmployeePerformanceReport';
+import { SalesReport } from '@/pages/reports/SalesReport';
+import { PurchasesReport } from '@/pages/reports/PurchasesReport';
+import { ServicesReport } from '@/pages/reports/ServicesReport';
+import { StockReport } from '@/pages/reports/StockReport';
 import { EmployeePerformancePrint } from '@/pages/reports/EmployeePerformancePrint';
+import { SalesPrint } from '@/pages/reports/SalesPrint';
+import { PurchasesPrint } from '@/pages/reports/PurchasesPrint';
+import { ServicesPrint } from '@/pages/reports/ServicesPrint';
+import { StockPrint } from '@/pages/reports/StockPrint';
 
 function App() {
   return (
@@ -65,8 +73,16 @@ function App() {
             <Route path="customers/:id" element={<CustomerForm />} />
 
             <Route path="reports/employee-performance" element={<EmployeePerformanceReport />} />
+            <Route path="reports/sales" element={<SalesReport />} />
+            <Route path="reports/purchases" element={<PurchasesReport />} />
+            <Route path="reports/services" element={<ServicesReport />} />
+            <Route path="reports/stock" element={<StockReport />} />
           </Route>
           <Route path="/print/employee-performance" element={<EmployeePerformancePrint />} />
+          <Route path="/print/sales" element={<SalesPrint />} />
+          <Route path="/print/purchases" element={<PurchasesPrint />} />
+          <Route path="/print/services" element={<ServicesPrint />} />
+          <Route path="/print/stock" element={<StockPrint />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

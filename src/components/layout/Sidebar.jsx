@@ -41,6 +41,10 @@ const sidebarItems = [
     route: '/reports',
     children: [
       { label: 'Rendimiento Empleados', route: '/reports/employee-performance' },
+      { label: 'Ventas', route: '/reports/sales' },
+      { label: 'Compras', route: '/reports/purchases' },
+      { label: 'Servicios', route: '/reports/services' },
+      { label: 'Inventario', route: '/reports/stock' },
     ],
   },
   { icon: Settings, label: 'Configuración', route: '/settings' },

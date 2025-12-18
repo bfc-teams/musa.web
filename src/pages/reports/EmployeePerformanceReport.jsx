@@ -4,6 +4,8 @@ import api from '@/services/api';
 import { format } from 'date-fns';
 import { InputGroup } from '@/components/ui/FormElements';
 import { Printer } from 'lucide-react';
+import { exportToExcel } from '@/utils/exportUtils';
+import { formatDate } from '@/utils/formatUtils';
 
 export const EmployeePerformanceReport = () => {
   const { register, watch } = useForm({
@@ -55,6 +57,81 @@ export const EmployeePerformanceReport = () => {
     window.open('/print/employee-performance', '_blank');
   };
 
+  const handleExportExcel = () => {
+    // Flatten data for Excel
+    const flatData = [];
+
+    if (reportType === 'detailed') {
+      reportData.forEach(emp => {
+        if (emp.services && emp.services.length > 0) {
+          emp.services.forEach(svc => {
+            flatData.push({
+              'Empleado': emp.employeeName,
+              'Rol': emp.employeeRole,
+              'Tipo': 'Servicio',
+              'Nombre Servicio': svc.serviceName,
+              'Fecha': svc.date ? formatDate(svc.date) : '-',
+              'Precio': svc.price,
+              '%': svc.percentage + '%',
+              'Ganancia Empleado (Bs.)': svc.commission,
+              'Ganancia Empresa': svc.companyProfit
+            });
+          });
+        } else {
+          // Employee with no services but present in report? Unlikely if built from services, but good safety
+          flatData.push({
+            'Empleado': emp.employeeName,
+            'Rol': emp.employeeRole,
+            'Tipo': 'Resumen',
+            'Nombre Servicio': 'Sin Servicios',
+            'Fecha': '-',
+            'Precio': 0,
+            '%': '0%',
+            'Ganancia Empleado (Bs.)': 0,
+            'Ganancia Empresa': 0
+          });
+        }
+        // Add a summary row for the employee? Maybe not needed if we have individual lines.
+        // Or just let user sum it up in Excel.
+      });
+    } else {
+      // Summary mode
+      reportData.forEach(emp => {
+        flatData.push({
+          'Empleado': emp.employeeName,
+          'Rol': emp.employeeRole,
+          'Servicios Count': emp.serviceCount,
+          'Ventas Totales': emp.totalSales,
+          'Comisión Total': emp.totalCommission,
+          'Ganancia Empresa Total': emp.totalCompanyProfit
+        });
+      });
+    }
+
+    // Headers are dynamic based on flatData keys, so we can pass a simple mapping or just utilize the logic in exportUtils if it supports direct objects (it does map keys).
+    // Let's create a headers object based on what we pushed.
+    const headers = reportType === 'detailed' ? {
+      'Empleado': 'Empleado',
+      'Rol': 'Rol',
+      'Tipo': 'Tipo',
+      'Nombre Servicio': 'Nombre Servicio',
+      'Fecha': 'Fecha',
+      'Precio': 'Precio',
+      '%': '%',
+      'Ganancia Empleado (Bs.)': 'Ganancia Empleado (Bs.)',
+      'Ganancia Empresa': 'Ganancia Empresa'
+    } : {
+      'Empleado': 'Empleado',
+      'Rol': 'Rol',
+      'Servicios Count': 'Servicios Count',
+      'Ventas Totales': 'Ventas Totales',
+      'Comisión Total': 'Comisión Total',
+      'Ganancia Empresa Total': 'Ganancia Empresa Total'
+    };
+
+    exportToExcel(flatData, headers, `Rendimiento_Empleados_${startDate}_${endDate}.xlsx`);
+  };
+
   const calculateTotalCommission = () => {
     return reportData.reduce((acc, curr) => acc + (Number(curr.totalCommission) || 0), 0);
   };
@@ -73,13 +150,21 @@ export const EmployeePerformanceReport = () => {
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">
           Reporte de Rendimiento de Empleados
         </h2>
-        <button
-          onClick={handlePrint}
-          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
-        >
-          <Printer className="h-5 w-5" />
-          Imprimir / Guardar PDF
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleExportExcel}
+            className="inline-flex items-center justify-center rounded bg-success py-2 px-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
+          >
+            Exportar Excel
+          </button>
+          <button
+            onClick={handlePrint}
+            className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-2 px-6 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
+          >
+            <Printer className="h-5 w-5" />
+            Imprimir / PDF
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-9 sm:grid-cols-2 mb-6 no-print">
@@ -192,17 +277,17 @@ export const EmployeePerformanceReport = () => {
                       </td>
                       <td className="py-5 px-4 dark:border-strokedark">
                         <p className="text-black dark:text-white">
-                          ${item.totalSales.toFixed(2)}
+                          Bs. {item.totalSales.toFixed(2)}
                         </p>
                       </td>
                       <td className="py-5 px-4 dark:border-strokedark">
                         <p className="text-success font-medium">
-                          ${item.totalCommission.toFixed(2)}
+                          Bs. {item.totalCommission.toFixed(2)}
                         </p>
                       </td>
                       <td className="py-5 px-4 dark:border-strokedark">
                         <p className="text-primary font-medium">
-                          ${item.totalCompanyProfit?.toFixed(2) || '0.00'}
+                          Bs. {item.totalCompanyProfit?.toFixed(2) || '0.00'}
                         </p>
                       </td>
                     </tr>
@@ -217,13 +302,13 @@ export const EmployeePerformanceReport = () => {
                         {reportData.reduce((acc, curr) => acc + curr.serviceCount, 0)}
                       </td>
                       <td className="py-5 px-4">
-                        ${calculateTotalSales().toFixed(2)}
+                        Bs. {calculateTotalSales().toFixed(2)}
                       </td>
                       <td className="py-5 px-4 text-success">
-                        ${calculateTotalCommission().toFixed(2)}
+                        Bs. {calculateTotalCommission().toFixed(2)}
                       </td>
                       <td className="py-5 px-4 text-primary">
-                        ${calculateTotalCompanyProfit().toFixed(2)}
+                        Bs. {calculateTotalCompanyProfit().toFixed(2)}
                       </td>
                     </tr>
                   )}

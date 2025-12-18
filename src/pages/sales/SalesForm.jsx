@@ -5,6 +5,8 @@ import { InputGroup, SelectGroup } from '@/components/ui/FormElements';
 import api from '@/services/api';
 import { Plus, Trash2, Search } from 'lucide-react';
 import { ProductSelectionModal } from '@/components/ProductSelectionModal';
+import { formatCurrency } from '@/utils/formatUtils';
+import { CustomerSelectionModal } from '@/components/CustomerSelectionModal';
 
 export const SalesForm = () => {
   const navigate = useNavigate();
@@ -12,6 +14,12 @@ export const SalesForm = () => {
   const [barcode, setBarcode] = useState('');
   const [barcodeError, setBarcodeError] = useState('');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+
+  const handleSelectCustomer = (customer) => {
+    setValue('customer_name', customer.name);
+    setIsCustomerModalOpen(false);
+  };
 
   const {
     register,
@@ -150,13 +158,33 @@ export const SalesForm = () => {
                   required
                   options={warehouses.map(w => ({ value: w.id, label: w.name }))}
                 />
-                <InputGroup
-                  label="Nombre del Cliente"
-                  name="customer_name"
-                  register={register}
-                  error={errors.customer_name}
-                  required
-                  placeholder="Cliente Casual"
+                <div className="mb-4.5">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Cliente <span className="text-gray-400 text-sm">(Opcional)</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="flex-grow">
+                      <input
+                        type="text"
+                        {...register('customer_name')}
+                        placeholder="Nombre del Cliente (Opcional)"
+                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsCustomerModalOpen(true)}
+                      className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-3 text-center font-medium text-white hover:bg-opacity-90"
+                    >
+                      Buscar
+                    </button>
+                  </div>
+                </div>
+
+                <CustomerSelectionModal
+                  isOpen={isCustomerModalOpen}
+                  onClose={() => setIsCustomerModalOpen(false)}
+                  onSelect={handleSelectCustomer}
                 />
                 <SelectGroup
                   label="Método de Pago"
@@ -197,7 +225,7 @@ export const SalesForm = () => {
                 </div>
                 <div className="mb-4 flex justify-between text-xl font-bold text-primary">
                   <span>Monto Total:</span>
-                  <span>${totalAmount.toFixed(2)}</span>
+                  <span>{formatCurrency(totalAmount)}</span>
                 </div>
                 <button
                   type="submit"
@@ -331,6 +359,7 @@ export const SalesForm = () => {
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
         onAddProducts={handleAddProductsFromModal}
+        warehouseId={watch('warehouse_id')}
       />
     </>
   );
