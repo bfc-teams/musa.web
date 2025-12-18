@@ -4,7 +4,7 @@ import api from '@/services/api';
 import { InputGroup } from '@/components/ui/FormElements';
 
 import { exportToExcel } from '@/utils/exportUtils';
-import { formatCurrency } from '@/utils/formatUtils';
+import { formatCurrency, formatDate } from '@/utils/formatUtils';
 
 export const ServicesReport = () => {
   const { register, watch } = useForm({

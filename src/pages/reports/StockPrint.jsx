@@ -28,7 +28,6 @@ export const StockPrint = () => {
   return (
     <div className="p-8 bg-white text-black">
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold uppercase">MUSA - Beauty Studio</h1>
         <h2 className="text-xl font-semibold mt-2">Reporte de Inventario</h2>
         <p className="text-sm text-gray-600 mt-1">Generado el: {new Date().toLocaleDateString()}</p>
       </div>

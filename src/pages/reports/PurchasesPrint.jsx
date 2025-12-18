@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { formatDate } from '@/utils/formatUtils';
+import { formatDate, formatCurrency } from '@/utils/formatUtils';
 
 export const PurchasesPrint = () => {
   const [reportData, setReportData] = useState(null);
@@ -30,7 +30,6 @@ export const PurchasesPrint = () => {
   return (
     <div className="p-8 bg-white text-black">
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold uppercase">MUSA - Beauty Studio</h1>
         <h2 className="text-xl font-semibold mt-2">Reporte de Compras</h2>
         <p className="text-sm text-gray-600 mt-1">Periodo: {startDate} - {endDate}</p>
       </div>
@@ -62,7 +61,7 @@ export const PurchasesPrint = () => {
                   {item.Warehouse?.name || '-'}
                 </td>
                 <td className="border border-gray-300 p-2 text-right">
-                  ${Number(item.total_cost).toFixed(2)}
+                  Bs. {Number(item.total_cost).toFixed(2)}
                 </td>
               </tr>
               {reportData.includeDetails && item.PurchaseItems && item.PurchaseItems.length > 0 && (
@@ -84,8 +83,8 @@ export const PurchasesPrint = () => {
                               {detail.Product ? detail.Product.name : 'Item Eliminado'}
                             </td>
                             <td className="text-center py-1">{detail.quantity}</td>
-                            <td className="text-right py-1">${Number(detail.unit_cost).toFixed(2)}</td>
-                            <td className="text-right py-1">${Number(detail.total_cost).toFixed(2)}</td>
+                            <td className="text-right py-1">{formatCurrency(Number(detail.unit_cost))}</td>
+                            <td className="text-right py-1">{formatCurrency(Number(Number(detail.quantity) * Number(detail.unit_cost)))}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -98,7 +97,7 @@ export const PurchasesPrint = () => {
           <tr className="font-bold bg-gray-50">
             <td colSpan="4" className="border border-gray-300 p-2 text-right">TOTAL COMPRAS</td>
             <td className="border border-gray-300 p-2 text-right">
-              ${calculateTotalCost().toFixed(2)}
+              Bs. {calculateTotalCost().toFixed(2)}
             </td>
           </tr>
         </tbody>
