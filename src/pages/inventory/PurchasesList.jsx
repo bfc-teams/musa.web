@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { formatCurrency, formatDate } from '@/utils/formatUtils';
 import { Link } from 'react-router-dom';
 import { Table } from '@/components/ui/Table';
@@ -67,7 +68,7 @@ export const PurchasesList = () => {
     { header: 'Factura #', accessor: 'invoice_number' },
     { header: 'Proveedor', accessor: 'Supplier.name', render: (row) => row.Supplier?.name || 'N/A' },
     { header: 'Almacén', accessor: 'Warehouse.name', render: (row) => row.Warehouse?.name || 'N/A' },
-    { header: 'Costo Total', accessor: 'total_cost', render: (row) => `$${Number(row.total_cost || 0).toFixed(2)}` },
+    { header: 'Costo Total', accessor: 'total_cost', render: (row) => formatCurrency(row.total_cost) },
     { header: 'Estado', accessor: 'status' },
   ];
 

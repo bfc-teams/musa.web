@@ -5,6 +5,7 @@ import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
 import { Plus, Eye } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/utils/formatUtils';
+import { ItemDetailsModal } from '@/components/ItemDetailsModal';
 
 
 
