@@ -1,8 +1,9 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
+import { jwtDecode } from 'jwt-decode';
 import api from '@/lib/api'
 
 export const useAuthStore = create((set) => ({
-  user: null,
+  user: localStorage.getItem('token') ? jwtDecode(localStorage.getItem('token')) : null,
   token: localStorage.getItem('token'),
   isAuthenticated: !!localStorage.getItem('token'),
   isLoading: false,
@@ -25,10 +26,11 @@ export const useAuthStore = create((set) => ({
 
       if (response.data.token) {
         localStorage.setItem('token', response.data.token)
+        const decodedUser = jwtDecode(response.data.token);
         set({
           isAuthenticated: true,
           token: response.data.token,
-          user: response.data.user || { username: credentials.username, role: response.data.role }, // Fallback if user not in response
+          user: { ...decodedUser, ...response.data.user }, // Combine decoded token and user data
           isLoading: false
         })
       } else {

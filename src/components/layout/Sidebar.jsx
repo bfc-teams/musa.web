@@ -9,45 +9,50 @@ const sidebarItems = [
     icon: LayoutDashboard,
     label: 'Inicio',
     route: '/',
+    permission: 'menu:dashboard',
   },
-  { icon: Users, label: 'Empleados', route: '/employees' },
-  { icon: Users, label: 'Clientes', route: '/customers' },
+  { icon: Users, label: 'Empleados', route: '/employees', permission: 'menu:employees' },
+  { icon: Users, label: 'Clientes', route: '/customers', permission: 'menu:customers' },
+  { icon: Users, label: 'Usuarios', route: '/users', permission: 'menu:users' },
   {
     icon: Package,
     label: 'Inventario',
     route: '/inventory',
+    permission: 'menu:inventory',
     children: [
-      { label: 'Almacenes', route: '/inventory/warehouses' },
-      { label: 'Proveedores', route: '/inventory/suppliers' },
-      { label: 'Productos', route: '/products' },
-      { label: 'Stock Global', route: '/inventory/stock' },
-      { label: 'Transferir Stock', route: '/inventory/transfers/new' },
+      { label: 'Almacenes', route: '/inventory/warehouses', permission: 'menu:warehouses' },
+      { label: 'Proveedores', route: '/inventory/suppliers', permission: 'menu:suppliers' },
+      { label: 'Productos', route: '/products', permission: 'menu:products' },
+      { label: 'Stock Global', route: '/inventory/stock', permission: 'menu:stock' },
+      { label: 'Transferir Stock', route: '/inventory/transfers/new', permission: 'menu:stock_transfers' },
     ],
   },
-  { icon: ShoppingBag, label: 'Compras', route: '/inventory/purchases' },
-  { icon: ShoppingCart, label: 'Ventas', route: '/sales' },
+  { icon: ShoppingBag, label: 'Compras', route: '/inventory/purchases', permission: 'menu:purchases' },
+  { icon: ShoppingCart, label: 'Ventas', route: '/sales', permission: 'menu:sales' },
   {
     icon: Scissors,
     label: 'Servicios',
     route: '/services',
+    permission: 'menu:services',
     children: [
-      { label: 'Catálogo de Servicios', route: '/services' },
-      { label: 'Órdenes de Servicio', route: '/service-orders' },
+      { label: 'Catálogo de Servicios', route: '/services', permission: 'menu:service_catalog' },
+      { label: 'Órdenes de Servicio', route: '/service-orders', permission: 'menu:service_orders' },
     ],
   },
   {
     icon: FileText,
     label: 'Reportes',
     route: '/reports',
+    permission: 'menu:reports',
     children: [
-      { label: 'Rendimiento Empleados', route: '/reports/employee-performance' },
-      { label: 'Ventas', route: '/reports/sales' },
-      { label: 'Compras', route: '/reports/purchases' },
-      { label: 'Servicios', route: '/reports/services' },
-      { label: 'Inventario', route: '/reports/stock' },
+      { label: 'Rendimiento Empleados', route: '/reports/employee-performance', permission: 'report:employee_performance' },
+      { label: 'Ventas', route: '/reports/sales', permission: 'report:sales' },
+      { label: 'Compras', route: '/reports/purchases', permission: 'report:purchases' },
+      { label: 'Servicios', route: '/reports/services', permission: 'report:services' },
+      { label: 'Inventario', route: '/reports/stock', permission: 'report:stock' },
     ],
   },
-  { icon: Settings, label: 'Configuración', route: '/settings' },
+  { icon: Settings, label: 'Configuración', route: '/settings', permission: 'menu:users' },
 ];
 
 export function Sidebar({ sidebarOpen, setSidebarOpen }) {
@@ -55,12 +60,25 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const { pathname } = location;
   const trigger = useRef(null);
   const sidebar = useRef(null);
-  const logout = useAuthStore((state) => state.logout);
+  const { user, logout } = useAuthStore();
 
   const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
   );
+
+  // Filter sidebar items based on permissions
+  const filteredSidebarItems = sidebarItems.filter((item) => {
+    // If no user or no permissions, show nothing or only dashboard? 
+    // Assuming backend sends permissions. If not, default to empty array.
+    const userPermissions = user?.permissions || [];
+
+    // If item has no permission defined, show it (or hide? User said strictly enable options).
+    // Let's assume generic items are visible, but our mapped items are restricted.
+    if (!item.permission) return true;
+
+    return userPermissions.includes(item.permission);
+  });
 
   // close on click outside
   useEffect(() => {
@@ -131,7 +149,7 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }) {
             </h3>
 
             <ul className="mb-6 flex flex-col gap-1.5">
-              {sidebarItems.map((item, index) => {
+              {filteredSidebarItems.map((item, index) => {
                 const Icon = item.icon;
 
                 if (item.children) {

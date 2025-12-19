@@ -34,6 +34,8 @@ import { SalesPrint } from '@/pages/reports/SalesPrint';
 import { PurchasesPrint } from '@/pages/reports/PurchasesPrint';
 import { ServicesPrint } from '@/pages/reports/ServicesPrint';
 import { StockPrint } from '@/pages/reports/StockPrint';
+import { UsersList } from '@/pages/users/UsersList';
+import { UserForm } from '@/pages/users/UserForm';
 
 function App() {
   return (
@@ -71,6 +73,10 @@ function App() {
             <Route path="customers" element={<CustomersList />} />
             <Route path="customers/new" element={<CustomerForm />} />
             <Route path="customers/:id" element={<CustomerForm />} />
+
+            <Route path="users" element={<UsersList />} />
+            <Route path="users/new" element={<UserForm />} />
+            <Route path="users/:id/edit" element={<UserForm />} />
 
             <Route path="reports/employee-performance" element={<EmployeePerformanceReport />} />
             <Route path="reports/sales" element={<SalesReport />} />
