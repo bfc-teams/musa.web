@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InputGroup } from '@/components/ui/FormElements';
@@ -8,7 +8,6 @@ export const UserForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
-  const [activeTab, setActiveTab] = useState('general');
   const [employees, setEmployees] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,7 +31,7 @@ export const UserForm = () => {
 
   const fetchEmployees = async () => {
     try {
-      const res = await api.get('/employees'); // Assuming this returns { data: [...] } or [...]
+      const res = await api.get('/employees');
       setEmployees(res.data.data || res.data || []);
     } catch (error) {
       console.error('Error fetching employees:', error);
@@ -46,10 +45,11 @@ export const UserForm = () => {
       reset({
         username: user.username,
         email: user.email,
-        role: user.role, // Legacy role string
-        role_id: user.role_id, // New role ID
+        role: user.role,
+        role_id: user.role_id,
         employee_id: user.employee_id,
-        status: user.status
+        status: user.status,
+        password: '',
       });
     } catch (error) {
       console.error('Error fetching user:', error);
@@ -59,34 +59,29 @@ export const UserForm = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
+      const payload = {
+        ...data,
+        role_id: data.role_id || null,
+        employee_id: data.employee_id || null,
+      };
 
-      // Ensure 'role' string is set based on role_id if available, for backward compatibility
-      if (data.role_id) {
-        const selectedRole = roles.find(r => r.id === parseInt(data.role_id));
+      if (payload.role_id) {
+        const selectedRole = roles.find((role) => role.id === Number(payload.role_id));
         if (selectedRole) {
-          // You might map role name to slug if needed, but for now using name or a simplified slug
-          // The backend seems to use 'admin', 'reception', 'employee' slugs in the ENUM.
-          // Role names in seed are 'Admin', 'Manager', 'Employee', 'Receptionist'.
-          // We might need to map them or just send the name lowercased? 
-          // Let's assume sending role_id is enough for new logic, but if backend CREATE expects 'role' enum...
-          // The backend controller takes `role` and `role_id`.
-          // If I send `role: selectedRole.name.toLowerCase()` it might match enum if simplistic.
-          // But safer to just pass role_id and let backend handle or user selecting it if we keep the field hidden?
-          // User asked to load select from DB. 
-          // I will use role_id as the primary value for the select.
-          // And inject 'role_id' into data.
-          // data.role is what the form registers. I should register 'role_id' instead in the select.
-          // Let's change the select name to 'role_id'.
+          const normalizedRoleName = selectedRole.name.toLowerCase();
+          payload.role = normalizedRoleName.includes('admin')
+            ? 'admin'
+            : normalizedRoleName.includes('recep')
+              ? 'reception'
+              : 'employee';
         }
       }
 
       if (id) {
-        // Update (password is optional)
-        if (!data.password) delete data.password;
-        await api.put(`/users/${id}`, data);
+        if (!payload.password) delete payload.password;
+        await api.put(`/users/${id}`, payload);
       } else {
-        // Create
-        await api.post('/users', data);
+        await api.post('/users', payload);
       }
       navigate('/users');
     } catch (error) {
@@ -104,7 +99,7 @@ export const UserForm = () => {
           {id ? 'Editar Usuario' : 'Nuevo Usuario'}
         </h3>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
         <div className="p-6.5">
           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
             <InputGroup
@@ -114,6 +109,7 @@ export const UserForm = () => {
               required
               placeholder="Ingresa nombre de usuario"
               error={errors.username}
+              autoComplete="off"
               width="w-full xl:w-1/2"
             />
             <InputGroup
@@ -122,18 +118,20 @@ export const UserForm = () => {
               type="email"
               register={register}
               placeholder="Ingresa email"
+              autoComplete="off"
               width="w-full xl:w-1/2"
             />
           </div>
 
           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
             <InputGroup
-              label={id ? "Contraseña (Dejar en blanco para mantener)" : "Contraseña"}
+              label={id ? 'Contrasena (Dejar en blanco para mantener)' : 'Contrasena'}
               name="password"
               type="password"
               register={register}
               required={!id}
-              placeholder="Ingresa contraseña"
+              placeholder="Ingresa contrasena"
+              autoComplete="new-password"
               width="w-full xl:w-1/2"
             />
 
@@ -144,6 +142,7 @@ export const UserForm = () => {
               <div className="relative z-20 bg-transparent dark:bg-form-input">
                 <select
                   {...register('role_id', { required: 'Este campo es requerido' })}
+                  autoComplete="off"
                   className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 >
                   <option value="">Seleccionar Rol</option>
@@ -165,6 +164,7 @@ export const UserForm = () => {
               <div className="relative z-20 bg-transparent dark:bg-form-input">
                 <select
                   {...register('employee_id')}
+                  autoComplete="off"
                   className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 >
                   <option value="">Seleccionar Empleado (Opcional)</option>
@@ -184,6 +184,7 @@ export const UserForm = () => {
               <div className="relative z-20 bg-transparent dark:bg-form-input">
                 <select
                   {...register('status')}
+                  autoComplete="off"
                   className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 >
                   <option value="active">Activo</option>

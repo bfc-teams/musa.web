@@ -9,6 +9,7 @@ export const InputGroup = ({
   error,
   required = false,
   customClasses = '',
+  autoComplete,
 }) => {
   return (
     <div className={`mb-4.5 ${customClasses}`}>
@@ -18,6 +19,7 @@ export const InputGroup = ({
       <input
         type={type}
         placeholder={placeholder}
+        autoComplete={autoComplete}
         {...register(name, { required })}
         className={`w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${error ? 'border-meta-1 focus:border-meta-1' : ''
           }`}
