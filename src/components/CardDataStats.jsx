@@ -9,22 +9,24 @@ const CardDataStats = ({
   children,
 }) => {
   return (
-    <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4">
+    <div className="rounded-2xl border border-white/70 bg-white/90 px-6 py-6 shadow-[0_18px_45px_-28px_rgba(15,23,42,0.35)] backdrop-blur dark:border-strokedark dark:bg-boxdark/80">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-white/10 dark:text-white">
         {children}
       </div>
 
-      <div className="mt-4 flex items-end justify-between">
-        <div>
-          <h4 className="text-title-md font-bold text-black dark:text-white">
+      <div className="mt-5 flex items-end justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-400 dark:text-bodydark2">
+            {title}
+          </p>
+          <h4 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
             {total}
           </h4>
-          <span className="text-sm font-medium">{title}</span>
         </div>
 
         <span
-          className={`flex items-center gap-1 text-sm font-medium ${levelUp && 'text-meta-3'
-            } ${levelDown && 'text-meta-5'} `}
+          className={`flex min-h-9 items-center gap-1 rounded-full px-3 text-sm font-medium ${levelUp ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300' : ''
+            } ${levelDown ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-300' : ''} ${!rate ? 'invisible' : ''}`}
         >
           {rate}
 

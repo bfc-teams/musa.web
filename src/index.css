@@ -3,8 +3,33 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
-    @apply relative z-1 font-satoshi text-base font-normal text-body;
+    @apply relative z-1 min-h-screen bg-gray-3 font-satoshi text-base font-normal text-body antialiased transition-colors duration-300 dark:bg-boxdark-2 dark:text-bodydark;
+  }
+
+  body::before {
+    content: "";
+    @apply pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(60,80,224,0.10),_transparent_38%),linear-gradient(180deg,_rgba(255,255,255,0.96),_rgba(247,249,252,0.98))] dark:bg-[radial-gradient(circle_at_top,_rgba(128,202,238,0.12),_transparent_30%),linear-gradient(180deg,_rgba(26,34,44,0.98),_rgba(18,23,31,1))];
+  }
+
+  * {
+    @apply border-stroke;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-black dark:text-white;
   }
 }
 

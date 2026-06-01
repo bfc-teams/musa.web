@@ -39,7 +39,7 @@ import { UserForm } from '@/pages/users/UserForm';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
