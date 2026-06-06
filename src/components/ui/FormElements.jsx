@@ -10,6 +10,7 @@ export const InputGroup = ({
   required = false,
   customClasses = '',
   autoComplete,
+  disabled = false,
 }) => {
   return (
     <div className={`mb-4.5 ${customClasses}`}>
@@ -20,6 +21,7 @@ export const InputGroup = ({
         type={type}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        disabled={disabled}
         {...register(name, { required })}
         className={`w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${error ? 'border-meta-1 focus:border-meta-1' : ''
           }`}
@@ -37,6 +39,8 @@ export const SelectGroup = ({
   error,
   required = false,
   customClasses = '',
+  placeholder,
+  disabled = false,
 }) => {
   return (
     <div className={`mb-4.5 ${customClasses}`}>
@@ -45,12 +49,13 @@ export const SelectGroup = ({
       </label>
       <div className="relative z-20 bg-transparent dark:bg-form-input">
         <select
+          disabled={disabled}
           {...register(name, { required })}
           className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${error ? 'border-meta-1' : ''
             }`}
         >
           <option value="" disabled className="text-body dark:text-bodydark">
-            Select {label}
+            {placeholder || `Seleccionar ${label}`}
           </option>
           {options.map((opt) => (
             <option key={opt.value} value={opt.value} className="text-body dark:text-bodydark">

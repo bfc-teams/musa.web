@@ -6,12 +6,34 @@ import DropdownUser from '../header/DropdownUser';
 
 export function Header({ sidebarOpen, setSidebarOpen }) {
   const location = useLocation();
+  const routeSegmentLabels = {
+    login: 'Inicio de sesion',
+    employees: 'Empleados',
+    products: 'Productos',
+    services: 'Servicios',
+    'service-orders': 'Ordenes de servicio',
+    customers: 'Clientes',
+    users: 'Usuarios',
+    inventory: 'Inventario',
+    warehouses: 'Almacenes',
+    suppliers: 'Proveedores',
+    purchases: 'Compras',
+    transfers: 'Transferencias',
+    stock: 'Stock',
+    sales: 'Ventas',
+    reports: 'Reportes',
+    print: 'Impresion',
+    'employee-performance': 'Rendimiento de empleados',
+    new: 'Nuevo',
+    edit: 'Editar',
+  };
+
   const pathLabel = location.pathname === '/'
     ? 'Panel general'
     : location.pathname
       .split('/')
       .filter(Boolean)
-      .map((segment) => segment.replace(/-/g, ' '))
+      .map((segment) => routeSegmentLabels[segment] || segment.replace(/-/g, ' '))
       .join(' / ');
 
   const today = new Intl.DateTimeFormat('es-BO', {

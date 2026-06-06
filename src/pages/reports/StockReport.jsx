@@ -234,7 +234,7 @@ export const StockReport = () => {
                       VALOR TOTAL INVENTARIO (Estimado Costo)
                     </td>
                     <td className="py-5 px-4 text-black dark:text-white">
-                      ${calculateTotalValue().toFixed(2)}
+                      Bs. {calculateTotalValue().toFixed(2)}
                     </td>
                   </tr>
                 </>

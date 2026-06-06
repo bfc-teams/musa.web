@@ -99,7 +99,7 @@ export const ServiceSelectionModal = ({ isOpen, onClose, onAddServices }) => {
                       />
                     </td>
                     <td className="p-3">{service.name}</td>
-                    <td className="p-3">${Number(service.base_price).toFixed(2)}</td>
+                    <td className="p-3">Bs. {Number(service.base_price).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>

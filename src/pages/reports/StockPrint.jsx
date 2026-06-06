@@ -63,10 +63,10 @@ export const StockPrint = () => {
                   {quantity}
                 </td>
                 <td className="border border-gray-300 p-2 text-right">
-                  ${costPrice.toFixed(2)}
+                  Bs. {costPrice.toFixed(2)}
                 </td>
                 <td className="border border-gray-300 p-2 text-right">
-                  ${totalVal.toFixed(2)}
+                  Bs. {totalVal.toFixed(2)}
                 </td>
               </tr>
             );
@@ -74,7 +74,7 @@ export const StockPrint = () => {
           <tr className="font-bold bg-gray-50">
             <td colSpan="5" className="border border-gray-300 p-2 text-right">VALOR TOTAL INVENTARIO</td>
             <td className="border border-gray-300 p-2 text-right">
-              ${calculateTotalValue().toFixed(2)}
+              Bs. {calculateTotalValue().toFixed(2)}
             </td>
           </tr>
         </tbody>

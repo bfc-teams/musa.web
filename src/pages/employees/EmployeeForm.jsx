@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InputGroup, SelectGroup } from '@/components/ui/FormElements';
@@ -8,6 +8,7 @@ export const EmployeeForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = !!id;
+  const [employeeRoles, setEmployeeRoles] = useState([]);
 
   const {
     register,
@@ -17,19 +18,27 @@ export const EmployeeForm = () => {
   } = useForm();
 
   useEffect(() => {
+    fetchEmployeeRoles();
     if (isEditMode) {
       fetchEmployee();
     }
   }, [id]);
 
+  const fetchEmployeeRoles = async () => {
+    try {
+      const response = await api.get('/employee-roles?fetchAll=true');
+      setEmployeeRoles(response.data || []);
+    } catch (error) {
+      console.error('Error fetching employee roles:', error);
+    }
+  };
+
   const fetchEmployee = async () => {
     try {
       const response = await api.get(`/employees/${id}`);
       const data = response.data;
-      // Set form values
-      Object.keys(data).forEach((key) => {
-        setValue(key, data[key]);
-      });
+      Object.keys(data).forEach((key) => setValue(key, data[key]));
+      setValue('employee_role_id', data.employee_role_id || '');
     } catch (error) {
       console.error('Error fetching employee:', error);
     }
@@ -37,10 +46,15 @@ export const EmployeeForm = () => {
 
   const onSubmit = async (data) => {
     try {
+      const payload = {
+        ...data,
+        employee_role_id: data.employee_role_id || null,
+      };
+
       if (isEditMode) {
-        await api.put(`/employees/${id}`, data);
+        await api.put(`/employees/${id}`, payload);
       } else {
-        await api.post('/employees', data);
+        await api.post('/employees', payload);
       }
       navigate('/employees');
     } catch (error) {
@@ -108,16 +122,16 @@ export const EmployeeForm = () => {
 
             <div className="mb-4.5">
               <SelectGroup
-                label="Rol"
-                name="role"
+                label="Rol del Empleado"
+                name="employee_role_id"
                 register={register}
-                error={errors.role}
+                error={errors.employee_role_id}
                 required
-                options={[
-                  { value: 'ADMIN', label: 'Admin' },
-                  { value: 'STYLIST', label: 'Estilista' },
-                  { value: 'RECEPTIONIST', label: 'Recepcionista' },
-                ]}
+                options={employeeRoles.map((role) => ({
+                  value: role.id,
+                  label: role.name,
+                }))}
+                placeholder="Seleccionar rol del empleado"
               />
             </div>
 

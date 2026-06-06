@@ -64,7 +64,7 @@ const DropdownNotification = () => {
           }`}
       >
         <div className="px-4.5 py-3">
-          <h5 className="text-sm font-medium text-bodydark2">Notification</h5>
+          <h5 className="text-sm font-medium text-bodydark2">Notificaciones</h5>
         </div>
 
         <ul className="flex h-auto flex-col overflow-y-auto">
@@ -75,13 +75,12 @@ const DropdownNotification = () => {
             >
               <p className="text-sm">
                 <span className="text-black dark:text-white">
-                  Edit your information in a swipe
+                  Actualiza tu informacion rapidamente
                 </span>{' '}
-                Sint occaecat cupidatat non proident, sunt in culpa qui officia
-                deserunt mollit anim.
+                Revisa tus datos, permisos y configuracion del sistema desde tu perfil.
               </p>
 
-              <p className="text-xs">12 May, 2025</p>
+              <p className="text-xs">12 may, 2025</p>
             </Link>
           </li>
           <li>
@@ -91,12 +90,12 @@ const DropdownNotification = () => {
             >
               <p className="text-sm">
                 <span className="text-black dark:text-white">
-                  It is a long established fact
+                  Nuevo resumen disponible
                 </span>{' '}
-                that a reader will be distracted by the readable.
+                Ya puedes revisar reportes recientes de ventas, servicios y stock.
               </p>
 
-              <p className="text-xs">24 Feb, 2025</p>
+              <p className="text-xs">24 feb, 2025</p>
             </Link>
           </li>
           <li>
@@ -106,13 +105,12 @@ const DropdownNotification = () => {
             >
               <p className="text-sm">
                 <span className="text-black dark:text-white">
-                  There are many variations
+                  Recordatorio del sistema
                 </span>{' '}
-                of passages of Lorem Ipsum available, but the majority have
-                suffered
+                Mantén actualizados los catalogos de productos, servicios y categorias.
               </p>
 
-              <p className="text-xs">04 Jan, 2025</p>
+              <p className="text-xs">04 ene, 2025</p>
             </Link>
           </li>
         </ul>

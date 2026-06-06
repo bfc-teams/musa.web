@@ -1,25 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Edit, Trash2, Plus } from 'lucide-react';
 import { Table } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
 import api from '@/services/api';
-import { Edit, Trash2, Plus } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { formatCurrency } from '@/utils/formatUtils';
 
 export const ServicesList = () => {
   const [services, setServices] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [filters, setFilters] = useState({ name: '', category: '' });
+  const [filters, setFilters] = useState({ name: '', category_id: '' });
   const limit = 10;
 
   const debouncedFilters = useDebounce(filters, 1000);
 
   useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
     fetchServices(currentPage);
   }, [currentPage, debouncedFilters]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/categories?fetchAll=true');
+      setCategories(response.data || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   const fetchServices = async (page) => {
     setLoading(true);
@@ -42,7 +56,7 @@ export const ServicesList = () => {
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1);
   };
 
   const handleDelete = async (id) => {
@@ -58,9 +72,10 @@ export const ServicesList = () => {
 
   const columns = [
     { header: 'Nombre', accessor: 'name' },
-    { header: 'Duración (min)', accessor: 'duration_minutes' },
+    { header: 'Categoria', accessor: 'Category.name', render: (row) => row.Category?.name || 'Sin categoria' },
+    { header: 'Duracion (min)', accessor: 'duration_minutes' },
     { header: 'Precio', accessor: 'base_price', render: (row) => formatCurrency(row.base_price) },
-    { header: 'Comisión (%)', accessor: 'default_commission_percent', render: (row) => `${row.default_commission_percent}%` },
+    { header: 'Comision (%)', accessor: 'default_commission_percent', render: (row) => `${row.default_commission_percent}%` },
   ];
 
   const actions = (row) => (
@@ -97,7 +112,6 @@ export const ServicesList = () => {
         </Link>
       </div>
 
-      {/* Filters */}
       <div className="mb-6 rounded-sm border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="w-full sm:w-1/2">
@@ -112,17 +126,17 @@ export const ServicesList = () => {
           </div>
           <div className="w-full sm:w-1/2">
             <select
-              name="category"
-              value={filters.category}
+              name="category_id"
+              value={filters.category_id}
               onChange={handleFilterChange}
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             >
-              <option value="">Todas las Categorías</option>
-              <option value="Hair">Cabello</option>
-              <option value="Nails">Uñas</option>
-              <option value="Skin">Piel</option>
-              <option value="Massage">Masaje</option>
-              <option value="Other">Otro</option>
+              <option value="">Todas las Categorias</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>

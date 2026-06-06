@@ -111,7 +111,7 @@ export const PurchasesList = () => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <p>Cargando...</p>
       ) : (
         <>
           <Table columns={columns} data={purchases} actions={actions} />

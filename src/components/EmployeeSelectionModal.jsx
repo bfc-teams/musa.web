@@ -17,8 +17,13 @@ export const EmployeeSelectionModal = ({ isOpen, onClose, onSelect }) => {
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/employees?limit=100&role=STYLIST');
-      setEmployees(response.data.data || []);
+      const response = await api.get('/employees?limit=100&fetchAll=true');
+      const allEmployees = response.data.data || response.data || [];
+      setEmployees(
+        allEmployees.filter((employee) =>
+          `${employee.EmployeeRole?.name || employee.role || ''}`.toLowerCase().includes('estilist')
+        )
+      );
     } catch (error) {
       console.error('Error fetching employees:', error);
     } finally {
@@ -81,7 +86,7 @@ export const EmployeeSelectionModal = ({ isOpen, onClose, onSelect }) => {
                     onClick={() => handleSelect(employee)}
                   >
                     <td className="p-3">{employee.name}</td>
-                    <td className="p-3">{employee.role}</td>
+                    <td className="p-3">{employee.EmployeeRole?.name || employee.role}</td>
                     <td className="p-3 text-right">
                       <button className="text-primary hover:underline">Seleccionar</button>
                     </td>

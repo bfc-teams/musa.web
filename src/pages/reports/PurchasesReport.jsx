@@ -274,7 +274,7 @@ export const PurchasesReport = () => {
                       TOTALES
                     </td>
                     <td className="py-5 px-4 text-meta-1">
-                      ${calculateTotalCost().toFixed(2)}
+                      Bs. {calculateTotalCost().toFixed(2)}
                     </td>
                   </tr>
                 </>

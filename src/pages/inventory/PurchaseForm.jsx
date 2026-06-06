@@ -163,7 +163,7 @@ export const PurchaseForm = () => {
                 </div>
                 <div className="mb-4 flex justify-between text-xl font-bold text-primary">
                   <span>Costo Total:</span>
-                  <span>${totalCost.toFixed(2)}</span>
+                  <span>Bs. {totalCost.toFixed(2)}</span>
                 </div>
                 <button
                   type="submit"

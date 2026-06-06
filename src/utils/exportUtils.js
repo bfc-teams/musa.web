@@ -14,8 +14,8 @@ export const exportToExcel = (data, headers, filename = 'report.xlsx') => {
     headerKeys.forEach(key => {
       let value = row[key];
 
-      // Handle nested properties
-      if (key.includes('.')) {
+      // Handle nested properties only when the direct key does not exist.
+      if (!Object.prototype.hasOwnProperty.call(row, key) && key.includes('.')) {
         const keys = key.split('.');
         let nestedVal = row;
         for (const k of keys) {

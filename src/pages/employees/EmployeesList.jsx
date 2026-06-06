@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Table } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
@@ -8,6 +8,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 
 export const EmployeesList = () => {
   const [employees, setEmployees] = useState([]);
+  const [employeeRoles, setEmployeeRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -17,8 +18,21 @@ export const EmployeesList = () => {
   const debouncedFilters = useDebounce(filters, 1000);
 
   useEffect(() => {
+    fetchEmployeeRoles();
+  }, []);
+
+  useEffect(() => {
     fetchEmployees(currentPage);
   }, [currentPage, debouncedFilters]);
+
+  const fetchEmployeeRoles = async () => {
+    try {
+      const response = await api.get('/employee-roles?fetchAll=true');
+      setEmployeeRoles(response.data || []);
+    } catch (error) {
+      console.error('Error fetching employee roles:', error);
+    }
+  };
 
   const fetchEmployees = async (page) => {
     setLoading(true);
@@ -29,7 +43,6 @@ export const EmployeesList = () => {
         ...debouncedFilters,
       }).toString();
       const response = await api.get(`/employees?${queryParams}`);
-      console.log('Employees API Response:', response.data); // Debugging
       setEmployees(response.data.data || []);
       setTotalPages(response.data.pagination?.totalPages || 1);
     } catch (error) {
@@ -39,14 +52,14 @@ export const EmployeesList = () => {
     }
   };
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Está seguro de que desea eliminar este empleado?')) {
+    if (window.confirm('¿Esta seguro de que desea eliminar este empleado?')) {
       try {
         await api.delete(`/employees/${id}`);
         fetchEmployees(currentPage);
@@ -59,8 +72,8 @@ export const EmployeesList = () => {
   const columns = [
     { header: 'Nombre', accessor: 'name' },
     { header: 'Email', accessor: 'email' },
-    { header: 'Rol', accessor: 'role' },
-    { header: 'Teléfono', accessor: 'phone' },
+    { header: 'Rol', accessor: 'role', render: (row) => row.EmployeeRole?.name || row.role || '-' },
+    { header: 'Telefono', accessor: 'phone' },
   ];
 
   const actions = (row) => (
@@ -68,14 +81,14 @@ export const EmployeesList = () => {
       <Link
         to={`/employees/${row.id}/edit`}
         className="hover:text-primary"
-        title="Edit"
+        title="Editar"
       >
         <Edit className="h-5 w-5" />
       </Link>
       <button
         onClick={() => handleDelete(row.id)}
         className="hover:text-meta-1"
-        title="Delete"
+        title="Eliminar"
       >
         <Trash2 className="h-5 w-5" />
       </button>
@@ -97,7 +110,6 @@ export const EmployeesList = () => {
         </Link>
       </div>
 
-      {/* Filters */}
       <div className="mb-6 rounded-sm border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="w-full sm:w-1/3">
@@ -128,9 +140,9 @@ export const EmployeesList = () => {
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             >
               <option value="">Todos los Roles</option>
-              <option value="ADMIN">Admin</option>
-              <option value="STYLIST">Estilista</option>
-              <option value="RECEPTIONIST">Recepcionista</option>
+              {employeeRoles.map((role) => (
+                <option key={role.id} value={role.id}>{role.name}</option>
+              ))}
             </select>
           </div>
         </div>

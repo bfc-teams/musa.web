@@ -60,14 +60,14 @@ export const ServicesPrint = () => {
                 {item.Employee?.name || 'Sin Asignar'}
               </td>
               <td className="border border-gray-300 p-2 text-right">
-                ${Number(item.price).toFixed(2)}
+                Bs. {Number(item.price).toFixed(2)}
               </td>
             </tr>
           ))}
           <tr className="font-bold bg-gray-50">
             <td colSpan="4" className="border border-gray-300 p-2 text-right">TOTAL</td>
             <td className="border border-gray-300 p-2 text-right">
-              ${calculateTotal().toFixed(2)}
+              Bs. {calculateTotal().toFixed(2)}
             </td>
           </tr>
         </tbody>

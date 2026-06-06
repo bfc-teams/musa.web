@@ -90,7 +90,7 @@ export const SalesList = () => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <p>Cargando...</p>
       ) : (
         <>
           <Table columns={columns} data={sales} actions={actions} />
